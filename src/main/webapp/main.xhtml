@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<f:view>
+    <h:head>
+        <title>Point Checker - Проверка точек</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <h:outputStylesheet name="css/styles.css"/>
+    </h:head>
+    <h:body>
+        <div class="container">
+            <div class="header">
+                <h1>Проверка попадания точки в область</h1>
+                <h:link outcome="goToIndex" value="Вернуться на стартовую страницу" styleClass="back-link"/>
+            </div>
+
+            <h:form id="pointForm">
+                <div class="form-section">
+                    <h3>Координата X:</h3>
+                    <p:selectOneMenu value="#{pointBean.x}" required="true" requiredMessage="Выберите значение X">
+                        <f:selectItem itemLabel="Выберите X" itemValue=""/>
+                        <f:selectItem itemValue="-3" itemLabel="-3"/>
+                        <f:selectItem itemValue="-2" itemLabel="-2"/>
+                        <f:selectItem itemValue="-1" itemLabel="-1"/>
+                        <f:selectItem itemValue="0" itemLabel="0"/>
+                        <f:selectItem itemValue="1" itemLabel="1"/>
+                        <f:selectItem itemValue="2" itemLabel="2"/>
+                        <f:selectItem itemValue="3" itemLabel="3"/>
+                        <f:selectItem itemValue="4" itemLabel="4"/>
+                        <f:selectItem itemValue="5" itemLabel="5"/>
+                    </p:selectOneMenu>
+                    <h:message for="pointForm:x" styleClass="error-message"/>
+                </div>
+
+                <div class="form-section">
+                    <h3>Координата Y:</h3>
+                    <p:inputText value="#{pointBean.y}" required="true"
+                                 requiredMessage="Введите значение Y" validatorMessage="Y должен быть от -3 до 5">
+                        <f:validateDoubleRange minimum="-3" maximum="5"/>
+                    </p:inputText>
+                    <h:message for="pointForm:y" styleClass="error-message"/>
+                </div>
+
+                <div class="form-section">
+                    <h3>Радиус R:</h3>
+                    <p:selectOneRadio value="#{pointBean.r}" required="true" requiredMessage="Выберите значение R">
+                        <f:selectItem itemValue="1" itemLabel="1"/>
+                        <f:selectItem itemValue="1.5" itemLabel="1.5"/>
+                        <f:selectItem itemValue="2" itemLabel="2"/>
+                        <f:selectItem itemValue="2.5" itemLabel="2.5"/>
+                        <f:selectItem itemValue="3" itemLabel="3"/>
+                    </p:selectOneRadio>
+                    <h:message for="pointForm:r" styleClass="error-message"/>
+                </div>
+
+                <p:commandButton value="Проверить точку" action="#{pointBean.checkPoint}"
+                                 update="resultsTable graph" styleClass="submit-btn"/>
+            </h:form>
+
+            <div class="graph-section">
+                <h3>График области</h3>
+                <p:graphicImage value="/resources/images/graph.svg" id="graph" width="400" height="400">
+                    <p:ajax event="click" listener="#{pointBean.handleGraphClick}" update="pointForm resultsTable"/>
+                </p:graphicImage>
+            </div>
+
+            <div class="results-section">
+                <h3>Результаты проверок</h3>
+                <p:dataTable id="resultsTable" value="#{resultsBean.allResults}" var="result"
+                             styleClass="results-table" paginator="true" rows="10">
+                    <p:column headerText="X">
+                        <h:outputText value="#{result.x}"/>
+                    </p:column>
+                    <p:column headerText="Y">
+                        <h:outputText value="#{result.y}"/>
+                    </p:column>
+                    <p:column headerText="R">
+                        <h:outputText value="#{result.r}"/>
+                    </p:column>
+                    <p:column headerText="Результат">
+                        <h:outputText value="#{result.hit ? 'Попадание' : 'Промах'}"
+                                      styleClass="#{result.hit ? 'hit' : 'miss'}"/>
+                    </p:column>
+                    <p:column headerText="Время">
+                        <h:outputText value="#{result.timestamp}">
+                            <f:convertDateTime pattern="HH:mm:ss"/>
+                        </h:outputText>
+                    </p:column>
+                </p:dataTable>
+            </div>
+        </div>
+    </h:body>
+</f:view>
+</html>
