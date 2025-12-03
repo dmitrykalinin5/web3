@@ -40,25 +40,30 @@ function drawShapes(ctx, centerX, centerY, scale, r) {
     ctx.strokeStyle = 'rgba(102, 126, 234, 0.8)';
     ctx.lineWidth = 2;
 
-    ctx.beginPath();
-    ctx.rect(centerX, centerY - r * scale, r * scale, r * scale);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(centerX - r * scale, centerY);
-    ctx.lineTo(centerX, centerY);
-    ctx.lineTo(centerX, centerY + r * scale);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
+    // Первая четверть (x >= 0, y >= 0): полукруг радиусом R/2
     ctx.beginPath();
     ctx.arc(centerX, centerY, (r/2) * scale, 0, Math.PI / 2, false);
     ctx.lineTo(centerX, centerY);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+
+    // Вторая четверть (x <= 0, y >= 0): треугольник (0,0), (-R/2,0), (0,R/2)
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY); // (0, 0)
+    ctx.lineTo(centerX - (r/2) * scale, centerY); // (-R/2, 0)
+    ctx.lineTo(centerX, centerY - (r/2) * scale); // (0, R/2)
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Третья четверть (x <= 0, y <= 0): прямоугольник (0,0), (-R/2,0), (0,-R), (-R/2,-R)
+    ctx.beginPath();
+    ctx.rect(centerX - (r/2) * scale, centerY, (r/2) * scale, r * scale);
+    ctx.fill();
+    ctx.stroke();
+
+    // Четвертая четверть (x >= 0, y <= 0): ничего не рисуем
 }
 
 function drawGrid(ctx, width, height, centerX, centerY, scale, r) {
@@ -360,11 +365,20 @@ window.addEventListener("load", function () {
         clearHistoryButton.addEventListener('click', clearHistoryOnServer);
     }
 
-    const defaultR = document.querySelector('input[name="r"]:checked');
-    if (defaultR) {
+    // Инициализация обработчиков формы
+    initFormHandlers();
+
+    // Установка начального значения R и отрисовка графика
+    const defaultR = document.querySelector('select[id*="r"]');
+    if (defaultR && defaultR.value) {
         currentR = parseFloat(defaultR.value);
     }
-    drawGraph(currentR);
+    if (currentR) {
+        drawGraph(currentR);
+    } else {
+        // Если R не выбран, рисуем график с дефолтным значением для визуализации
+        drawGraph(3);
+    }
 });
 
 function showServerError(message) {
@@ -402,10 +416,17 @@ if (pointForm) {
     pointForm.addEventListener("submit", function (event) {
         let valid = true;
 
-        // Валидация полей
-        const xChecked = document.querySelector("input[name='x']:checked");
-        if (!xChecked) {
-            document.getElementById("x-error").textContent = "Выберите значение X.";
+        // Валидация полей X (slider)
+        // PrimeFaces slider создает скрытое поле или input с id содержащим 'x'
+        const xInput = pointForm.querySelector('input[type="hidden"][id*="x"]') || 
+                       pointForm.querySelector('input[type="text"][id*="x"]') ||
+                       pointForm.querySelector('input[type="range"][id*="x"]');
+        const xValue = xInput ? xInput.value : null;
+        if (!xValue || xValue === '' || isNaN(parseFloat(xValue))) {
+            const xError = pointForm.querySelector('[id*="x"]')?.closest('.form-section')?.querySelector('.error-message');
+            if (xError) {
+                xError.textContent = "Выберите значение X.";
+            }
             valid = false;
         }
 
@@ -417,9 +438,12 @@ if (pointForm) {
             valid = false;
         }
 
-        const rChecked = document.querySelector("input[name='r']:checked");
-        if (!rChecked) {
-            document.getElementById("r-error").textContent = "Выберите значение R.";
+        const rSelect = pointForm.querySelector('select[id*="r"]');
+        if (!rSelect || !rSelect.value || rSelect.value === '') {
+            const rError = document.querySelector('[id*="r"]').closest('.form-section')?.querySelector('.error-message');
+            if (rError) {
+                rError.textContent = "Выберите значение R.";
+            }
             valid = false;
         }
 
@@ -433,12 +457,38 @@ if (pointForm) {
     });
 }
 
-document.querySelectorAll('input[name="r"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        currentR = parseFloat(this.value);
-        drawGraph(currentR);
+// Функция для обновления графика при изменении R (вызывается из PrimeFaces AJAX)
+function updateGraphFromR() {
+    const rSelect = document.querySelector('select[id*="r"]');
+    if (rSelect && rSelect.value) {
+        const value = parseFloat(rSelect.value);
+        if (value && !isNaN(value)) {
+            currentR = value;
+            drawGraph(currentR);
+        }
+    }
+}
+
+// Функция для инициализации обработчиков формы
+function initFormHandlers() {
+    // Обработчик изменения R (selectOneMenu) - используем делегирование
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.id && e.target.id.includes('r') && e.target.tagName === 'SELECT') {
+            const value = parseFloat(e.target.value);
+            if (value && !isNaN(value)) {
+                currentR = value;
+                drawGraph(currentR);
+            }
+        }
     });
-});
+
+    // Обработчик изменения X (slider) - используем делегирование
+    document.addEventListener('input', function(e) {
+        if (e.target && e.target.type === 'range' && e.target.id && e.target.id.includes('x')) {
+            // Slider изменен, можно добавить визуальную обратную связь
+        }
+    });
+}
 
 let lastValidY = '';
 
@@ -475,7 +525,7 @@ if (canvas) {
             return;
         }
 
-        const validX = [-3, -2, -1, 0, 1, 2, 3, 4, 5];
+        const validX = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
         let roundedX = validX[0];
         let minDiff = Math.abs(mathX - roundedX);
 
@@ -500,22 +550,46 @@ function submitPointFromGraph(x, y, r) {
         return;
     }
 
-    const xInput = pointForm.querySelector(`input[name='x'][value='${x}']`);
-    if (xInput) {
-        xInput.checked = true;
+    // Обновление X (slider) - PrimeFaces slider может иметь несколько input элементов
+    const xHiddenInput = pointForm.querySelector('input[type="hidden"][id*="x"]');
+    const xTextInput = pointForm.querySelector('input[type="text"][id*="x"]');
+    const xRangeInput = pointForm.querySelector('input[type="range"][id*="x"]');
+    
+    if (xHiddenInput) {
+        xHiddenInput.value = x;
+        xHiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (xTextInput) {
+        xTextInput.value = x;
+    }
+    if (xRangeInput) {
+        xRangeInput.value = x;
+        xRangeInput.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    const yInput = pointForm.querySelector("input[name='y']");
+    // Обновление Y (inputText)
+    const yInput = pointForm.querySelector("input[name='y'], input[id*='y']");
     if (yInput) {
         yInput.value = (Math.round(y * 1000) / 1000).toString();
     }
 
-    const rInput = pointForm.querySelector(`input[name='r'][value='${r}']`);
-    if (rInput) {
-        rInput.checked = true;
+    // Обновление R (selectOneMenu)
+    const rSelect = pointForm.querySelector('select[id*="r"]');
+    if (rSelect) {
+        rSelect.value = r.toString();
+        rSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        // Обновляем график после изменения R
+        if (r) {
+            currentR = parseFloat(r);
+            drawGraph(currentR);
+        }
     }
 
-    if (typeof pointForm.requestSubmit === 'function') {
+    // Отправка формы через PrimeFaces
+    const submitButton = pointForm.querySelector('button[type="submit"], input[type="submit"]');
+    if (submitButton) {
+        submitButton.click();
+    } else if (typeof pointForm.requestSubmit === 'function') {
         pointForm.requestSubmit();
     } else {
         pointForm.submit();
