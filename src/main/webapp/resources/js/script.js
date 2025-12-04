@@ -418,9 +418,9 @@ if (pointForm) {
 
         // Валидация полей X (slider)
         // PrimeFaces slider создает скрытое поле или input с id содержащим 'x'
-        const xInput = pointForm.querySelector('input[type="hidden"][id*="x"]') || 
-                       pointForm.querySelector('input[type="text"][id*="x"]') ||
-                       pointForm.querySelector('input[type="range"][id*="x"]');
+        const xInput = pointForm.querySelector('input[type="hidden"][id*="x"]') ||
+            pointForm.querySelector('input[type="text"][id*="x"]') ||
+            pointForm.querySelector('input[type="range"][id*="x"]');
         const xValue = xInput ? xInput.value : null;
         if (!xValue || xValue === '' || isNaN(parseFloat(xValue))) {
             const xError = pointForm.querySelector('[id*="x"]')?.closest('.form-section')?.querySelector('.error-message');
@@ -554,7 +554,7 @@ function submitPointFromGraph(x, y, r) {
     const xHiddenInput = pointForm.querySelector('input[type="hidden"][id*="x"]');
     const xTextInput = pointForm.querySelector('input[type="text"][id*="x"]');
     const xRangeInput = pointForm.querySelector('input[type="range"][id*="x"]');
-    
+
     if (xHiddenInput) {
         xHiddenInput.value = x;
         xHiddenInput.dispatchEvent(new Event('change', { bubbles: true }));

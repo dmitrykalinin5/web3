@@ -9,6 +9,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <h:outputStylesheet name="css/styles.css"/>
+        <h:outputScript name="js/script.js"/>
     </h:head>
     <h:body>
         <div class="container">
@@ -20,18 +21,10 @@
             <h:form id="pointForm">
                 <div class="form-section">
                     <h3>Координата X:</h3>
-                    <p:selectOneMenu value="#{pointBean.x}" required="true" requiredMessage="Выберите значение X">
-                        <f:selectItem itemLabel="Выберите X" itemValue=""/>
-                        <f:selectItem itemValue="-3" itemLabel="-3"/>
-                        <f:selectItem itemValue="-2" itemLabel="-2"/>
-                        <f:selectItem itemValue="-1" itemLabel="-1"/>
-                        <f:selectItem itemValue="0" itemLabel="0"/>
-                        <f:selectItem itemValue="1" itemLabel="1"/>
-                        <f:selectItem itemValue="2" itemLabel="2"/>
-                        <f:selectItem itemValue="3" itemLabel="3"/>
-                        <f:selectItem itemValue="4" itemLabel="4"/>
-                        <f:selectItem itemValue="5" itemLabel="5"/>
-                    </p:selectOneMenu>
+                    <p:slider id="x" value="#{pointBean.x}" min="-4" max="4" step="1" 
+                              display="input" required="true" requiredMessage="Выберите значение X">
+                        <p:ajax event="slideEnd" update="pointForm:x"/>
+                    </p:slider>
                     <h:message for="pointForm:x" styleClass="error-message"/>
                 </div>
 
@@ -46,25 +39,25 @@
 
                 <div class="form-section">
                     <h3>Радиус R:</h3>
-                    <p:selectOneRadio value="#{pointBean.r}" required="true" requiredMessage="Выберите значение R">
+                    <p:selectOneMenu id="r" value="#{pointBean.r}" required="true" requiredMessage="Выберите значение R">
+                        <f:selectItem itemLabel="Выберите R" itemValue=""/>
                         <f:selectItem itemValue="1" itemLabel="1"/>
                         <f:selectItem itemValue="1.5" itemLabel="1.5"/>
                         <f:selectItem itemValue="2" itemLabel="2"/>
                         <f:selectItem itemValue="2.5" itemLabel="2.5"/>
                         <f:selectItem itemValue="3" itemLabel="3"/>
-                    </p:selectOneRadio>
+                        <p:ajax event="change" update="@none" oncomplete="updateGraphFromR()"/>
+                    </p:selectOneMenu>
                     <h:message for="pointForm:r" styleClass="error-message"/>
                 </div>
 
                 <p:commandButton value="Проверить точку" action="#{pointBean.checkPoint}"
-                                 update="resultsTable graph" styleClass="submit-btn"/>
+                                 update="resultsTable" styleClass="submit-btn"/>
             </h:form>
 
             <div class="graph-section">
                 <h3>График области</h3>
-                <p:graphicImage value="/resources/images/graph.svg" id="graph" width="400" height="400">
-                    <p:ajax event="click" listener="#{pointBean.handleGraphClick}" update="pointForm resultsTable"/>
-                </p:graphicImage>
+                <canvas id="graphCanvas" width="400" height="400"></canvas>
             </div>
 
             <div class="results-section">
