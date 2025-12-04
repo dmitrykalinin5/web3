@@ -12,7 +12,7 @@
 
             <!-- Hibernate и JPA модули -->
             <module name="org.hibernate" export="true"/>
-            <module name="org.hibernate.orm" services="import"/>
+<!--            <module name="org.hibernate.orm" services="import"/>-->
 
             <!-- CDI -->
             <module name="jakarta.enterprise.api" export="true"/>
