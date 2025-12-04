@@ -16,44 +16,53 @@ repositories {
 }
 
 configurations {
-    // Исключаем возможные javax зависимости
-    all*.exclude group: 'javax', module: 'javaee-api'
-    all*.exclude group: 'javax', module: 'javax.faces-api'
-    all*.exclude group: 'javax', module: 'javax.servlet-api'
+    all {
+        // Более агрессивное исключение javax зависимостей
+        exclude group: 'javax', module: 'javaee-api'
+        exclude group: 'javax', module: 'javax.faces-api'
+        exclude group: 'javax', module: 'javax.servlet-api'
+        exclude group: 'javax', module: 'javax.enterprise.api'
+        exclude group: 'javax', module: 'javax.persistence-api'
+    }
 }
 
 dependencies {
     // PrimeFaces для Jakarta EE 10
     implementation 'org.primefaces:primefaces:13.0.0:jakarta'
 
-    // JSF API (только API, реализация предоставляется WildFly)
+    // Jakarta EE API (только для компиляции)
     compileOnly 'jakarta.faces:jakarta.faces-api:4.0.1'
-
-    // Servlet API (только для компиляции)
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-
-    // CDI API
     compileOnly 'jakarta.enterprise:jakarta.enterprise.cdi-api:4.0.1'
+    compileOnly 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 
-    // JPA
-    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    // Hibernate (будет использоваться из сервера, но нужен для компиляции)
     implementation 'org.hibernate.orm:hibernate-core:6.2.7.Final'
 
     // JSON
     implementation 'com.google.code.gson:gson:2.10.1'
 
-    // JSTL (если используется)
-    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
-    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
+    // Для JSTL (если используется)
+    compileOnly 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
 }
 
 war {
     archiveFileName = 'webapp.war'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // Удаляем лишние файлы
     exclude '**/javax/**'
-    exclude '**/META-INF/**/*.jar'
+    exclude '**/META-INF/versions/**'
+    exclude '**/*.jar'
+
+    // Включаем jboss-deployment-structure.xml
+    from('src/main/resources') {
+        include 'jboss-deployment-structure.xml'
+        into 'WEB-INF'
+    }
 }
 
 compileJava {
     options.encoding = 'UTF-8'
+    options.compilerArgs += ['-parameters']
 }
