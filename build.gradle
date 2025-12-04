@@ -39,9 +39,6 @@ dependencies {
     implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     implementation 'org.hibernate.orm:hibernate-core:6.2.7.Final'
 
-    // Oracle JDBC
-    implementation 'com.oracle.database.jdbc:ojdbc11:21.11.0.0'
-
     // JSON
     implementation 'com.google.code.gson:gson:2.10.1'
 
@@ -53,6 +50,8 @@ dependencies {
 war {
     archiveFileName = 'webapp.war'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude '**/javax/**'
+    exclude '**/META-INF/**/*.jar'
 }
 
 compileJava {
