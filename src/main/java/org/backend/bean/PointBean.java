@@ -6,9 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.backend.model.PointResult;
 import org.backend.service.PointService;
-
 import java.io.Serializable;
-import java.util.Date;
 
 @Named
 @SessionScoped
@@ -20,21 +18,17 @@ public class PointBean implements Serializable {
     @Inject
     private PointService pointService;
 
-    @Inject
-    private ResultsBean resultsBean;
-
     public String checkPoint() {
         if (isValid()) {
+            // checkPoint() уже сохраняет результат в базу
             PointResult result = pointService.checkPoint(x, y, r);
-            resultsBean.addResult(result);
+            // Не нужно вызывать resultsBean.addResult(result) - это уже сделано в checkPoint()
         }
         return null; // Остаемся на той же странице
     }
 
     public void handleGraphClick(AjaxBehaviorEvent event) {
         // Метод для обработки клика на графике
-        // Координаты будут установлены через параметры запроса или JavaScript
-        // Здесь можно добавить логику обработки клика, если нужно
     }
 
     private boolean isValid() {

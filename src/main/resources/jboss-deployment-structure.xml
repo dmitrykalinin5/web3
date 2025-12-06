@@ -7,12 +7,11 @@
             <module name="com.sun.jsf-impl" slot="main"/>
         </exclusions>
         <dependencies>
-            <!-- Подключаем модуль Oracle JDBC -->
-            <module name="com.oracle" services="import"/>
+            <!-- Подключаем модуль PostgreSQL JDBC -->
+            <module name="org.postgresql" services="import"/>
 
             <!-- Hibernate и JPA модули -->
             <module name="org.hibernate" export="true"/>
-<!--            <module name="org.hibernate.orm" services="import"/>-->
 
             <!-- CDI -->
             <module name="jakarta.enterprise.api" export="true"/>
@@ -22,6 +21,9 @@
 
             <!-- JSF API (PrimeFaces требует это) -->
             <module name="jakarta.faces.api" export="true"/>
+
+            <!-- JPA API -->
+            <module name="jakarta.persistence.api" export="true"/>
         </dependencies>
     </deployment>
 </jboss-deployment-structure>

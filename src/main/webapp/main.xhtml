@@ -21,9 +21,9 @@
             <h:form id="pointForm">
                 <div class="form-section">
                     <h3>Координата X:</h3>
-                    <p:slider id="x" value="#{pointBean.x}" min="-4" max="4" step="1" 
-                              display="input" required="true" requiredMessage="Выберите значение X">
-                        <p:ajax event="slideEnd" update="pointForm:x"/>
+                    <p:slider id="x" value="#{pointBean.x}" min="-4" max="4" step="1"
+                              required="true" requiredMessage="Выберите значение X">
+                        <p:ajax event="slideEnd" update="x"/>
                     </p:slider>
                     <h:message for="pointForm:x" styleClass="error-message"/>
                 </div>

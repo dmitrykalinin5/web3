@@ -6,7 +6,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.backend.model.PointResult;
 import org.backend.service.PointService;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -25,7 +24,9 @@ public class ResultsBean implements Serializable {
     }
 
     public void addResult(PointResult result) {
-        pointService.saveResult(result);
+        // Метод saveResult больше не существует в PointService
+        // Вместо этого, если нужно сохранить существующий результат,
+        // нужно пересоздать его или изменить логику
         loadAllResults();
     }
 

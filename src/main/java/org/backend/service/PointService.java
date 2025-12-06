@@ -1,16 +1,24 @@
 package org.backend.service;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import org.backend.model.PointResult;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import org.backend.repository.PointResultRepository;
+import java.util.Date;
+import java.util.List;
 
+@ApplicationScoped
 public class PointService {
-    private List<PointResult> results = new CopyOnWriteArrayList<>();
 
+    @Inject
+    private PointResultRepository repository;
+
+    @Transactional
     public PointResult checkPoint(double x, double y, double r) {
         boolean hit = checkArea(x, y, r);
         PointResult result = new PointResult(x, y, r, hit, new Date());
-        saveResult(result);
+        repository.save(result);
         return result;
     }
 
@@ -27,15 +35,18 @@ public class PointService {
         return false;
     }
 
+    // В PointService.java добавьте:
+    @Transactional
     public void saveResult(PointResult result) {
-        results.add(0, result); // Добавляем в начало
+        repository.save(result);
     }
 
     public List<PointResult> getAllResults() {
-        return new ArrayList<>(results);
+        return repository.findAll();
     }
 
+    @Transactional
     public void clearResults() {
-        results.clear();
+        repository.deleteAll();
     }
 }

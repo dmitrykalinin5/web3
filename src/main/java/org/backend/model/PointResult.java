@@ -1,46 +1,67 @@
 package org.backend.model;
 
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.text.SimpleDateFormat;
 
+@Entity
+@Table(name = "point_result") // Изменяю имя таблицы
 public class PointResult implements Serializable {
-    private double x;
-    private double y;
-    private double r;
-    private boolean hit;
-    private Date timestamp;
-    private String formattedTime;
 
-    public PointResult(double x, double y, double r, boolean hit, Date timestamp) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private Double x;
+
+    @Column(nullable = false)
+    private Double y;
+
+    @Column(nullable = false)
+    private Double r;
+
+    @Column(nullable = false)
+    private Boolean hit;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "timestamp_col") // timestamp может быть зарезервированным словом
+    private Date timestamp;
+
+    // Конструкторы
+    public PointResult() {}
+
+    public PointResult(Double x, Double y, Double r, Boolean hit, Date timestamp) {
         this.x = x;
         this.y = y;
         this.r = r;
         this.hit = hit;
         this.timestamp = timestamp;
-        this.formattedTime = new SimpleDateFormat("HH:mm:ss").format(timestamp);
     }
 
-    public double getX() { return x; }
-    public double getY() { return y; }
-    public double getR() { return r; }
-    public boolean isHit() { return hit; }
+    // Геттеры и сеттеры
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Double getX() { return x; }
+    public void setX(Double x) { this.x = x; }
+
+    public Double getY() { return y; }
+    public void setY(Double y) { this.y = y; }
+
+    public Double getR() { return r; }
+    public void setR(Double r) { this.r = r; }
+
+    public Boolean getHit() { return hit; }
+    public void setHit(Boolean hit) { this.hit = hit; }
+
     public Date getTimestamp() { return timestamp; }
-    public String getFormattedTime() { return formattedTime; }
+    public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
 
-    public void setX(double x) { this.x = x; }
-    public void setY(double y) { this.y = y; }
-    public void setR(double r) { this.r = r; }
-    public void setHit(boolean hit) { this.hit = hit; }
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-        this.formattedTime = new SimpleDateFormat("HH:mm:ss").format(timestamp);
-    }
-    public void setFormattedTime(String formattedTime) { this.formattedTime = formattedTime; }
-
-    public void ensureFormattedTime() {
-        if (this.formattedTime == null && this.timestamp != null) {
-            this.formattedTime = new SimpleDateFormat("HH:mm:ss").format(this.timestamp);
-        }
+    // Уберите formattedTime из JPA, сделайте transient
+    @Transient
+    public String getFormattedTime() {
+        if (timestamp == null) return "";
+        return new java.text.SimpleDateFormat("HH:mm:ss").format(timestamp);
     }
 }

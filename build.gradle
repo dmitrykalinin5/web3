@@ -17,12 +17,13 @@ repositories {
 
 configurations {
     all {
-        // Более агрессивное исключение javax зависимостей
+        // Исключаем javax зависимости (для перехода на Jakarta EE 10)
         exclude group: 'javax', module: 'javaee-api'
         exclude group: 'javax', module: 'javax.faces-api'
         exclude group: 'javax', module: 'javax.servlet-api'
         exclude group: 'javax', module: 'javax.enterprise.api'
         exclude group: 'javax', module: 'javax.persistence-api'
+        exclude group: 'javax', module: 'javax.annotation-api'
     }
 }
 

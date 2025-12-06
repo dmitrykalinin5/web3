@@ -6,12 +6,17 @@
              https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
 
     <persistence-unit name="pointCheckerPU" transaction-type="JTA">
-        <jta-data-source>java:jboss/datasources/OracleDS</jta-data-source>
+        <!-- Используем PostgreSQL источник данных -->
+        <jta-data-source>java:jboss/datasources/PostgresDS</jta-data-source>
 
         <class>org.backend.model.PointResult</class>
 
         <properties>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.OracleDialect"/>
+            <!-- Для H2 (если используете тестовую БД) -->
+            <!-- <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/> -->
+
+            <!-- Для PostgreSQL -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
