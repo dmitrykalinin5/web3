@@ -25,16 +25,15 @@
                               required="true" requiredMessage="Выберите значение X">
                         <p:ajax event="slideEnd" update="x"/>
                     </p:slider>
-                    <h:message for="pointForm:x" styleClass="error-message"/>
+                    <h:message for="x" styleClass="error-message"/>
                 </div>
 
                 <div class="form-section">
                     <h3>Координата Y:</h3>
-                    <p:inputText value="#{pointBean.y}" required="true"
-                                 requiredMessage="Введите значение Y" validatorMessage="Y должен быть от -3 до 5">
-                        <f:validateDoubleRange minimum="-3" maximum="5"/>
+                    <p:inputText id="y" value="#{pointBean.y}" required="true"
+                                 requiredMessage="Введите значение Y">
                     </p:inputText>
-                    <h:message for="pointForm:y" styleClass="error-message"/>
+                    <h:message for="y" styleClass="error-message"/>
                 </div>
 
                 <div class="form-section">
@@ -48,7 +47,7 @@
                         <f:selectItem itemValue="3" itemLabel="3"/>
                         <p:ajax event="change" update="@none" oncomplete="updateGraphFromR()"/>
                     </p:selectOneMenu>
-                    <h:message for="pointForm:r" styleClass="error-message"/>
+                    <h:message for="r" styleClass="error-message"/>
                 </div>
 
                 <p:commandButton value="Проверить точку" action="#{pointBean.checkPoint}"

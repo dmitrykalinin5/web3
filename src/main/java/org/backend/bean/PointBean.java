@@ -1,6 +1,8 @@
 package org.backend.bean;
 
 import jakarta.enterprise.context.SessionScoped;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
 import jakarta.faces.event.AjaxBehaviorEvent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -23,6 +25,11 @@ public class PointBean implements Serializable {
             // checkPoint() уже сохраняет результат в базу
             PointResult result = pointService.checkPoint(x, y, r);
             // Не нужно вызывать resultsBean.addResult(result) - это уже сделано в checkPoint()
+        } else {
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, 
+                    "Ошибка валидации", 
+                    "Проверьте правильность введенных данных. Y должен быть от -3 до 5."));
         }
         return null; // Остаемся на той же странице
     }
