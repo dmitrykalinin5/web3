@@ -8,8 +8,8 @@
         <title>Point Checker - Проверка точек</title>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <h:outputStylesheet name="css/styles.css"/>
-        <h:outputScript name="js/script.js"/>
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/styles.css"/>
+        <script type="text/javascript" src="#{request.contextPath}/resources/js/script.js"></script>
     </h:head>
     <h:body>
         <div class="container">
@@ -21,10 +21,18 @@
             <h:form id="pointForm">
                 <div class="form-section">
                     <h3>Координата X:</h3>
-                    <p:slider id="x" value="#{pointBean.x}" min="-4" max="4" step="1"
-                              required="true" requiredMessage="Выберите значение X">
-                        <p:ajax event="slideEnd" update="x"/>
-                    </p:slider>
+                    <p:selectOneMenu id="x" value="#{pointBean.x}" required="true" requiredMessage="Выберите значение X">
+                        <f:selectItem itemLabel="Выберите X" itemValue=""/>
+                        <f:selectItem itemValue="-4" itemLabel="-4"/>
+                        <f:selectItem itemValue="-3" itemLabel="-3"/>
+                        <f:selectItem itemValue="-2" itemLabel="-2"/>
+                        <f:selectItem itemValue="-1" itemLabel="-1"/>
+                        <f:selectItem itemValue="0" itemLabel="0"/>
+                        <f:selectItem itemValue="1" itemLabel="1"/>
+                        <f:selectItem itemValue="2" itemLabel="2"/>
+                        <f:selectItem itemValue="3" itemLabel="3"/>
+                        <f:selectItem itemValue="4" itemLabel="4"/>
+                    </p:selectOneMenu>
                     <h:message for="x" styleClass="error-message"/>
                 </div>
 

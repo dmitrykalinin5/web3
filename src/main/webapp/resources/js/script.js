@@ -416,13 +416,9 @@ if (pointForm) {
     pointForm.addEventListener("submit", function (event) {
         let valid = true;
 
-        // Валидация полей X (slider)
-        // PrimeFaces slider создает скрытое поле или input с id содержащим 'x'
-        const xInput = pointForm.querySelector('input[type="hidden"][id*="x"]') ||
-            pointForm.querySelector('input[type="text"][id*="x"]') ||
-            pointForm.querySelector('input[type="range"][id*="x"]');
-        const xValue = xInput ? xInput.value : null;
-        if (!xValue || xValue === '' || isNaN(parseFloat(xValue))) {
+        // Валидация полей X (selectOneMenu)
+        const xSelect = pointForm.querySelector('select[id*="x"]');
+        if (!xSelect || !xSelect.value || xSelect.value === '') {
             const xError = pointForm.querySelector('[id*="x"]')?.closest('.form-section')?.querySelector('.error-message');
             if (xError) {
                 xError.textContent = "Выберите значение X.";
@@ -482,10 +478,10 @@ function initFormHandlers() {
         }
     });
 
-    // Обработчик изменения X (slider) - используем делегирование
-    document.addEventListener('input', function(e) {
-        if (e.target && e.target.type === 'range' && e.target.id && e.target.id.includes('x')) {
-            // Slider изменен, можно добавить визуальную обратную связь
+    // Обработчик изменения X (selectOneMenu) - используем делегирование
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.id && e.target.id.includes('x') && e.target.tagName === 'SELECT') {
+            // X изменен, можно добавить визуальную обратную связь
         }
     });
 }
@@ -550,21 +546,11 @@ function submitPointFromGraph(x, y, r) {
         return;
     }
 
-    // Обновление X (slider) - PrimeFaces slider может иметь несколько input элементов
-    const xHiddenInput = pointForm.querySelector('input[type="hidden"][id*="x"]');
-    const xTextInput = pointForm.querySelector('input[type="text"][id*="x"]');
-    const xRangeInput = pointForm.querySelector('input[type="range"][id*="x"]');
-
-    if (xHiddenInput) {
-        xHiddenInput.value = x;
-        xHiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    if (xTextInput) {
-        xTextInput.value = x;
-    }
-    if (xRangeInput) {
-        xRangeInput.value = x;
-        xRangeInput.dispatchEvent(new Event('input', { bubbles: true }));
+    // Обновление X (selectOneMenu)
+    const xSelect = pointForm.querySelector('select[id*="x"]');
+    if (xSelect) {
+        xSelect.value = x.toString();
+        xSelect.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     // Обновление Y (inputText)
