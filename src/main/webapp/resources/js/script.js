@@ -571,14 +571,31 @@ function submitPointFromGraph(x, y, r) {
         }
     }
 
-    // Отправка формы через PrimeFaces
-    const submitButton = pointForm.querySelector('button[type="submit"], input[type="submit"]');
-    if (submitButton) {
-        submitButton.click();
-    } else if (typeof pointForm.requestSubmit === 'function') {
-        pointForm.requestSubmit();
+    // Отправка формы через PrimeFaces AJAX
+    // Используем скрытую кнопку для AJAX-отправки
+    const graphSubmitBtn = document.getElementById('pointForm:graphSubmitBtn');
+    if (graphSubmitBtn) {
+        // PrimeFaces команда для AJAX-отправки
+        if (typeof PrimeFaces !== 'undefined' && PrimeFaces.ajax) {
+            PrimeFaces.ajax.Request.handle({
+                source: graphSubmitBtn,
+                event: 'click',
+                process: 'pointForm',
+                update: 'resultsTable'
+            });
+        } else {
+            graphSubmitBtn.click();
+        }
     } else {
-        pointForm.submit();
+        // Fallback на обычную отправку
+        const submitButton = pointForm.querySelector('button[type="submit"], input[type="submit"]');
+        if (submitButton) {
+            submitButton.click();
+        } else if (typeof pointForm.requestSubmit === 'function') {
+            pointForm.requestSubmit();
+        } else {
+            pointForm.submit();
+        }
     }
 }
 

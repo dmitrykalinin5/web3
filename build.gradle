@@ -51,6 +51,15 @@ war {
     archiveFileName = 'webapp.war'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
+    from('src/main/webapp') {
+        include '**/*.css'
+        include '**/*.js'
+        include '**/*.jpg'
+        include '**/*.png'
+        include '**/*.gif'
+        into ''
+    }
+
     // Удаляем лишние файлы
     exclude '**/javax/**'
     exclude '**/META-INF/versions/**'

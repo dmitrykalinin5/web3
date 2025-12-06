@@ -1286,3 +1286,42 @@ body.cookie-blocked #chat-widget {
         }
     }
 }
+
+/* Для PrimeFaces компонентов */
+.ui-selectonemenu {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 2px solid #ddd;
+}
+
+.ui-inputfield {
+    width: 100%;
+    padding: 12px;
+}
+
+.ui-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+/* Добавьте если нужно */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.form-section {
+    margin-bottom: 20px;
+}
+
+.results-section {
+    margin-top: 30px;
+}
+
+.graph-section {
+    margin: 30px 0;
+    text-align: center;
+}

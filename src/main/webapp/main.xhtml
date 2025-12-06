@@ -8,8 +8,11 @@
         <title>Point Checker - Проверка точек</title>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/styles.css"/>
-        <script type="text/javascript" src="#{request.contextPath}/resources/js/script.js"></script>
+        <h:outputStylesheet library="css" name="styles.css"/>
+        <h:outputScript library="js" name="script.js"/>
+        <!-- Fallback на случай проблем с JSF ресурсами -->
+        <link rel="stylesheet" type="text/css" href="#{facesContext.externalContext.requestContextPath}/resources/css/styles.css"/>
+        <script type="text/javascript" src="#{facesContext.externalContext.requestContextPath}/resources/js/script.js"></script>
     </h:head>
     <h:body>
         <div class="container">
@@ -39,7 +42,9 @@
                 <div class="form-section">
                     <h3>Координата Y:</h3>
                     <p:inputText id="y" value="#{pointBean.y}" required="true"
-                                 requiredMessage="Введите значение Y">
+                                 requiredMessage="Введите значение Y"
+                                 validatorMessage="Y должен быть от -3 до 5">
+                        <f:validateDoubleRange minimum="-3" maximum="5"/>
                     </p:inputText>
                     <h:message for="y" styleClass="error-message"/>
                 </div>
@@ -60,6 +65,10 @@
 
                 <p:commandButton value="Проверить точку" action="#{pointBean.checkPoint}"
                                  update="resultsTable" styleClass="submit-btn"/>
+                
+                <!-- Скрытая кнопка для отправки данных с графика -->
+                <p:commandButton id="graphSubmitBtn" action="#{pointBean.checkPoint}"
+                                 update="resultsTable" style="display:none;"/>
             </h:form>
 
             <div class="graph-section">

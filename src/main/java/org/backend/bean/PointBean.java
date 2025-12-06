@@ -19,12 +19,16 @@ public class PointBean implements Serializable {
 
     @Inject
     private PointService pointService;
+    
+    @Inject
+    private ResultsBean resultsBean;
 
     public String checkPoint() {
         if (isValid()) {
             // checkPoint() уже сохраняет результат в базу
             PointResult result = pointService.checkPoint(x, y, r);
-            // Не нужно вызывать resultsBean.addResult(result) - это уже сделано в checkPoint()
+            // Обновляем список результатов в ApplicationScoped бине
+            resultsBean.loadAllResults();
         } else {
             FacesContext.getCurrentInstance().addMessage(null, 
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, 
