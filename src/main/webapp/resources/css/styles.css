@@ -1325,3 +1325,305 @@ body.cookie-blocked #chat-widget {
     margin: 30px 0;
     text-align: center;
 }
+
+/* Основные стили тела */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Стили для заголовка */
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px 0;
+    text-align: center;
+    border-radius: 10px 10px 0 0;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-family: cursive !important;
+    font-size: 2.5em;
+    color: #ffffff;
+    margin: 0;
+}
+
+.back-link {
+    color: white;
+    text-decoration: none;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+/* Стили для секций формы */
+.form-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.form-section h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+/* Стили для PrimeFaces компонентов */
+.ui-selectonemenu {
+    width: 100% !important;
+    padding: 12px;
+    border: 2px solid #ddd !important;
+    border-radius: 6px !important;
+    font-size: 16px;
+    background: white !important;
+}
+
+.ui-inputfield {
+    width: 100% !important;
+    padding: 12px !important;
+    border: 2px solid #ddd !important;
+    border-radius: 6px !important;
+    font-size: 16px;
+}
+
+.ui-inputfield:focus {
+    outline: none;
+    border-color: #667eea !important;
+}
+
+/* Стили для кнопок */
+.ui-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    padding: 15px 30px !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-size: 18px !important;
+    cursor: pointer;
+    width: 100%;
+    transition: transform 0.2s;
+    margin: 3% 0;
+}
+
+.ui-button:hover {
+    transform: translateY(-2px);
+}
+
+/* Стили для графика */
+.graph-section {
+    text-align: center;
+    margin: 30px 0;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+#graphCanvas {
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    cursor: crosshair;
+}
+
+#graphCanvas:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* Стили для таблицы результатов */
+.results-section {
+    margin-top: 30px;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2% 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.results-table th,
+.results-table td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.results-table th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.results-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.hit {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.miss {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.execution-time {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+/* Стили для сообщений об ошибках */
+.error-message {
+    color: #dc3545;
+    font-size: 0.9em;
+    display: block;
+    margin: 1% 0;
+    min-height: 20px;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+/* Стили для часов и навигации на стартовой странице */
+.clock-container {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.2em;
+}
+
+.navigation {
+    text-align: center;
+    padding: 20px;
+}
+
+.nav-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 18px;
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.nav-link:hover {
+    transform: translateY(-2px);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .header {
+        border-radius: 0;
+    }
+
+    .ui-selectonemenu,
+    .ui-inputfield {
+        font-size: 14px;
+        padding: 10px !important;
+    }
+
+    .ui-button {
+        padding: 12px 20px !important;
+        font-size: 16px !important;
+    }
+
+    #graphCanvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+}
+
+/* Остальные стили (чаты, куки, всплывающие элементы) остаются без изменений */
+#floating-consultants {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.floating-consultant {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    opacity: 0.15;
+    filter: blur(0.5px);
+    animation: floatAndRotate 20s infinite linear;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.floating-consultant img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Анимации */
+@keyframes floatAndRotate {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(100px, 50px) rotate(90deg); }
+    50% { transform: translate(200px, -50px) rotate(180deg); }
+    75% { transform: translate(100px, -100px) rotate(270deg); }
+    100% { transform: translate(0, 0) rotate(360deg); }
+}
+
+/* Стили для чата (оставляем без изменений) */
+#chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+#chat-container {
+    width: 350px;
+    height: 500px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Стили для куки (оставляем без изменений) */
+.cookie-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+}
