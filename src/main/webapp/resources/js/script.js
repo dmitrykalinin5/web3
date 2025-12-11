@@ -41,7 +41,7 @@ function drawShapes(ctx, centerX, centerY, scale, r) {
 
     // 1 четверть: четверть круга
     ctx.beginPath();
-    ctx.arc(centerX, centerY, (r/2) * scale, 0, Math.PI / 2, false);
+    ctx.arc(centerX, centerY, (r/2) * scale, 1.5 * Math.PI, Math.PI * 2, false);
     ctx.lineTo(centerX, centerY);
     ctx.closePath();
     ctx.fill(); ctx.stroke();
@@ -81,9 +81,48 @@ function drawAxes(ctx, width, height, centerX, centerY) {
 }
 
 function drawLabels(ctx, centerX, centerY, scale, r) {
-    ctx.fillStyle = '#333'; ctx.font = '12px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('X', ctx.canvas.width - 10, centerY - 10);
+    ctx.fillStyle = '#333';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Подписи осей
+    ctx.fillText('X', ctx.canvas.width - 10, centerY - 15);
     ctx.fillText('Y', centerX + 15, 10);
+
+    // Рисуем метки для оси X
+    // R
+    ctx.fillText('R', centerX + r * scale, centerY + 15);
+    ctx.beginPath(); ctx.moveTo(centerX + r * scale, centerY - 3); ctx.lineTo(centerX + r * scale, centerY + 3); ctx.stroke();
+
+    // R/2
+    ctx.fillText('R/2', centerX + (r / 2) * scale, centerY + 15);
+    ctx.beginPath(); ctx.moveTo(centerX + (r/2) * scale, centerY - 3); ctx.lineTo(centerX + (r/2) * scale, centerY + 3); ctx.stroke();
+
+    // -R
+    ctx.fillText('-R', centerX - r * scale, centerY + 15);
+    ctx.beginPath(); ctx.moveTo(centerX - r * scale, centerY - 3); ctx.lineTo(centerX - r * scale, centerY + 3); ctx.stroke();
+
+    // -R/2
+    ctx.fillText('-R/2', centerX - (r / 2) * scale, centerY + 15);
+    ctx.beginPath(); ctx.moveTo(centerX - (r/2) * scale, centerY - 3); ctx.lineTo(centerX - (r/2) * scale, centerY + 3); ctx.stroke();
+
+    // Рисуем метки для оси Y (сдвигаем текст немного влево от оси)
+    // R
+    ctx.fillText('R', centerX - 15, centerY - r * scale);
+    ctx.beginPath(); ctx.moveTo(centerX - 3, centerY - r * scale); ctx.lineTo(centerX + 3, centerY - r * scale); ctx.stroke();
+
+    // R/2
+    ctx.fillText('R/2', centerX - 20, centerY - (r / 2) * scale);
+    ctx.beginPath(); ctx.moveTo(centerX - 3, centerY - (r/2) * scale); ctx.lineTo(centerX + 3, centerY - (r/2) * scale); ctx.stroke();
+
+    // -R
+    ctx.fillText('-R', centerX - 15, centerY + r * scale);
+    ctx.beginPath(); ctx.moveTo(centerX - 3, centerY + r * scale); ctx.lineTo(centerX + 3, centerY + r * scale); ctx.stroke();
+
+    // -R/2
+    ctx.fillText('-R/2', centerX - 20, centerY + (r / 2) * scale);
+    ctx.beginPath(); ctx.moveTo(centerX - 3, centerY + (r/2) * scale); ctx.lineTo(centerX + 3, centerY + (r/2) * scale); ctx.stroke();
 }
 
 function drawPoints(ctx, centerX, centerY, scale, r, pointsToDraw) {
@@ -339,3 +378,432 @@ function initCanvasClickHandler() {
         if (btn) btn.click();
     });
 }
+
+function addPointToGraph(x, y, hit, r) {
+    // Сохраняем R вместе с точкой для правильной фильтрации
+    points.push({ x, y, hit, r: r || currentR });
+    drawGraph(currentR);
+}
+
+function addRow(rowData) {
+    const table = document.getElementById("resultsTable");
+    if (!table) {
+        return;
+    }
+    const newRow = table.insertRow(0);
+    newRow.innerHTML = `
+        <td>${rowData.x}</td>
+        <td>${rowData.y.toFixed(2)}</td>
+        <td>${rowData.r}</td>
+        <td class="${rowData.hit ? "hit" : "miss"}">${rowData.hit ? "Попадание" : "Промах"}</td>
+        <td>${rowData.currentTime}</td>
+        <td class="execution-time">${rowData.executionTime}</td>
+    `;
+
+    // Немедленно добавляем точку на график
+    addPointToGraph(parseFloat(rowData.x), parseFloat(rowData.y), rowData.hit, parseFloat(rowData.r));
+}
+
+function loadResultsFromServer() {
+    const formData = new FormData();
+    formData.append('action', 'getHistory');
+
+    fetch(`${baseUrl}/controller`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Accept': 'application/json',
+        }
+    })
+        .then(response => {
+            console.log('Load history response status:', response.status);
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    console.warn('Non-JSON response for history:', text.substring(0, 200));
+                    throw new Error('Server returned non-JSON response');
+                });
+            }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                points = [];
+                const table = document.getElementById("resultsTable");
+                if (table) {
+                    const headerRow = table.rows[0];
+                    table.innerHTML = '';
+                    if (headerRow) table.appendChild(headerRow);
+
+                    data.results.forEach(rowData => {
+                        addRow(rowData);
+                    });
+                } else {
+                    console.debug('resultsTable element not found, skipping table rendering');
+                }
+
+                const resultsCount = document.getElementById('results-count');
+                if (resultsCount) {
+                    resultsCount.textContent = `Всего результатов: ${data.totalCount || data.results.length}`;
+                }
+
+                console.log(`Загружено ${data.results.length} результатов из глобальной истории`);
+
+                const loadingRow = document.getElementById('loading-row');
+                if (loadingRow) {
+                    loadingRow.remove();
+                }
+            } else {
+                console.error('Server error:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading history:', error);
+            const resultsCount = document.getElementById('results-count');
+            if (resultsCount) {
+                resultsCount.textContent = 'Ошибка загрузки истории: ' + error.message;
+            }
+        });
+}
+
+function clearHistoryOnServer() {
+    const button = document.getElementById('clear-history-btn');
+    if (!button) {
+        return;
+    }
+
+    const originalContent = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<span class="btn-icon">⏳</span> Очистка...';
+
+    const formData = new FormData();
+    formData.append('action', 'clearHistory');
+
+    fetch(`${baseUrl}/controller`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Accept': 'application/json',
+        }
+    })
+        .then(response => {
+            console.log('Clear history response status:', response.status);
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    console.warn('Non-JSON response for clearHistory:', text.substring(0, 200));
+                    throw new Error('Server returned non-JSON response');
+                });
+            }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                points = [];
+                const table = document.getElementById("resultsTable");
+                if (table) {
+                    table.innerHTML = '';
+                }
+
+                const resultsCount = document.getElementById('results-count');
+                if (resultsCount) {
+                    resultsCount.textContent = data.message || 'История очищена';
+                }
+
+                drawGraph(currentR);
+            } else {
+                throw new Error(data.error || 'Не удалось очистить историю');
+            }
+        })
+        .catch(error => {
+            console.error('Error clearing history:', error);
+            showServerError(`Ошибка очистки истории: ${error.message}`);
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerHTML = originalContent;
+        });
+}
+
+function updatePointsFromTable() {
+    const table = document.getElementById('resultsTable_data'); // ID таблицы PrimeFaces
+    if (!table) {
+        console.log('Table not found, waiting...');
+        setTimeout(updatePointsFromTable, 500);
+        return;
+    }
+
+    points = [];
+    const rows = table.querySelectorAll('tr'); // PrimeFaces строки
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 5) {
+            try {
+                // ВАЖНО: Заменяем запятую на точку перед парсингом!
+                const xText = cells[0].textContent.trim().replace(',', '.');
+                const yText = cells[1].textContent.trim().replace(',', '.');
+                const rText = cells[2].textContent.trim().replace(',', '.');
+
+                const x = parseFloat(xText);
+                const y = parseFloat(yText);
+                const r = parseFloat(rText);
+                const hitText = cells[3].textContent.trim();
+                const hit = hitText.includes('Попадание') || hitText.toLowerCase().includes('hit'); // Добавил проверку на разные варианты
+
+                if (!isNaN(x) && !isNaN(y) && !isNaN(r)) {
+                    points.push({ x, y, r, hit });
+                }
+            } catch (e) {
+                console.error('Error parsing row:', e);
+            }
+        }
+    });
+
+    console.log('Points updated from table:', points);
+    drawGraph(currentR);
+}
+
+window.addEventListener("load", function () {
+    console.log('Page loaded, initializing graph and loading global history...');
+
+    loadResultsFromServer();
+
+    const clearHistoryButton = document.getElementById('clear-history-btn');
+    if (clearHistoryButton) {
+        clearHistoryButton.addEventListener('click', clearHistoryOnServer);
+    }
+
+    drawGraph(currentR);
+
+    // Загружаем точки из таблицы
+    setTimeout(updateGraphAfterSubmit, 500);
+
+    // Инициализация обработчиков формы
+    initFormHandlers();
+
+    // Инициализация обработчика клика на canvas
+    initCanvasClickHandler();
+
+    // Установка начального значения R и отрисовка графика
+    const defaultR = document.querySelector('select[id*="r"]');
+    if (defaultR && defaultR.value) {
+        currentR = parseFloat(defaultR.value);
+    }
+    if (currentR) {
+        drawGraph(currentR);
+    } else {
+        // Если R не выбран, рисуем график с дефолтным значением для визуализации
+        drawGraph(3);
+    }
+
+    // Перерисовка графика при изменении R через select
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.id && e.target.id.includes('r')) {
+            const rValue = parseFloat(e.target.value);
+            if (!isNaN(rValue)) {
+                currentR = rValue;
+                drawGraph(currentR);
+            }
+        }
+    });
+});
+
+function showServerError(message) {
+    const serverErrorElement = document.getElementById('server-error');
+    if (!serverErrorElement) {
+        return;
+    }
+
+    serverErrorElement.textContent = message;
+    serverErrorElement.classList.add('visible');
+
+    if (serverErrorElement._hideTimeout) {
+        clearTimeout(serverErrorElement._hideTimeout);
+    }
+
+    serverErrorElement._hideTimeout = setTimeout(() => {
+        hideServerError();
+    }, 5000);
+}
+
+function hideServerError() {
+    const serverErrorElement = document.getElementById('server-error');
+    if (!serverErrorElement) return;
+
+    serverErrorElement.classList.remove('visible');
+    serverErrorElement.textContent = '';
+
+    if (serverErrorElement._hideTimeout) {
+        clearTimeout(serverErrorElement._hideTimeout);
+        serverErrorElement._hideTimeout = null;
+    }
+}
+
+if (pointForm) {
+    pointForm.addEventListener("submit", function (event) {
+        let valid = true;
+        const errors = [];
+
+        // Очищаем предыдущие ошибки
+        hideValidationError();
+
+        // Валидация полей X (selectOneMenu)
+        const xSelect = pointForm.querySelector('select[id*="x"]');
+        if (!xSelect || !xSelect.value || xSelect.value === '') {
+            const xError = pointForm.querySelector('[id*="x"]')?.closest('.form-section')?.querySelector('.error-message');
+            if (xError) {
+                xError.textContent = "Выберите значение X.";
+            }
+            errors.push("Выберите значение X.");
+            valid = false;
+        }
+
+        const yInput = document.querySelector("input[name='y'], input[id*='y']");
+        const yValue = yInput ? yInput.value.trim() : '';
+        if (!yValue) {
+            const yError = document.getElementById("y-error");
+            if (yError) {
+                yError.textContent = "Введите значение Y.";
+            }
+            errors.push("Введите значение Y.");
+            valid = false;
+        } else {
+            const y = parseFloat(yValue);
+            if (isNaN(y) || y < -3 || y > 5) {
+                const yError = document.getElementById("y-error");
+                if (yError) {
+                    yError.textContent = "Введите число от -3 до 5.";
+                }
+                errors.push("Y должен быть числом от -3 до 5.");
+                valid = false;
+            }
+        }
+
+        const rSelect = pointForm.querySelector('select[id*="r"]');
+        if (!rSelect || !rSelect.value || rSelect.value === '') {
+            const rError = document.querySelector('[id*="r"]')?.closest('.form-section')?.querySelector('.error-message');
+            if (rError) {
+                rError.textContent = "Выберите значение R.";
+            }
+            errors.push("Выберите значение R.");
+            valid = false;
+        }
+
+        if (!valid) {
+            // Показываем все ошибки под кнопкой
+            showValidationError(errors.join(' '));
+            event.preventDefault();
+            return false;
+        }
+
+        // Если валидация прошла успешно, скрываем ошибки
+        hideValidationError();
+        // Форма отправится обычным way
+        // и пользователь будет перенаправлен на страницу результата
+    });
+}
+
+// Функция для обновления графика при изменении R (вызывается из PrimeFaces AJAX)
+function updateGraphFromR() {
+    const rSelect = document.querySelector('[id*="r"]');
+    if (rSelect && rSelect.value) {
+        currentR = parseFloat(rSelect.value);
+        drawGraph(currentR);
+    }
+}
+
+let lastValidY = '';
+
+const yField = document.querySelector('input[name="y"]');
+if (yField) {
+    yField.addEventListener('input', function (e) {
+        const value = e.target.value;
+        const errorElement = document.getElementById('y-error');
+        const regex = /^-?\d*(\.\d*)?$/;
+        if (regex.test(value)) {
+            lastValidY = value;
+            if (errorElement) {
+                errorElement.textContent = '';
+            }
+            // Очищаем ошибки валидации при корректном вводе
+            hideValidationError();
+        } else {
+            if (errorElement) {
+                errorElement.textContent = 'Только числа разрешены';
+            }
+            e.target.value = lastValidY;
+        }
+    });
+}
+
+function submitPointFromGraph(x, y, r) {
+    if (!pointForm) return;
+
+    // Обновляем значения в форме
+    const xSelect = document.querySelector('[id*="x"]');
+    const yInput = document.querySelector('[id*="y"]');
+    const rSelect = document.querySelector('[id*="r"]');
+
+    if (xSelect) xSelect.value = x;
+    if (yInput) yInput.value = y;
+    if (rSelect) rSelect.value = r;
+
+    // Ищем и вызываем команду PrimeFaces
+    const submitButton = document.querySelector('[id*="checkPoint"]');
+    if (submitButton && typeof PrimeFaces !== 'undefined') {
+        // Используем PrimeFaces AJAX
+        PrimeFaces.ajax.AjaxRequest({
+            source: submitButton,
+            process: submitButton.id,
+            update: 'resultsTable',
+            oncomplete: function() {
+                updateGraphAfterSubmit();
+            }
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, initializing...');
+
+    // Загружаем начальные точки
+    updatePointsFromTable();
+
+    // Наблюдаем за изменениями в таблице
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                console.log('Table updated, refreshing points');
+                setTimeout(updatePointsFromTable, 100);
+            }
+        });
+    });
+
+    const table = document.getElementById('resultsTable_data');
+    if (table) {
+        observer.observe(table, { childList: true, subtree: true });
+    }
+
+    // Инициализация обработчиков
+    initFormHandlers();
+    initCanvasClickHandler();
+
+    // Следим за изменениями R
+    const rSelect = document.querySelector('[id*="r"]');
+    if (rSelect) {
+        rSelect.addEventListener('change', function() {
+            const value = parseFloat(this.value);
+            if (!isNaN(value)) {
+                currentR = value;
+                drawGraph(currentR);
+            }
+        });
+    }
+});

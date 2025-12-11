@@ -33,23 +33,33 @@
         <script>
             function updateClock() {
                 const now = new Date();
-                const options = {
+
+                // Опции для времени
+                const timeOptions = {
                     hour: '2-digit',
                     minute: '2-digit',
-                    second: '2-digit',
-                    timeZone: 'Europe/Moscow'
+                    second: '2-digit'
                 };
-                // Обновляем текст внутри div
-                document.getElementById('clock-display').innerText = now.toLocaleTimeString('ru-RU', options);
 
-                // Обновляем дату, если нужно, или просто оставляем время
-                // const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
-                // document.getElementById('date-display').innerText = now.toLocaleDateString('ru-RU', dateOptions);
+                // Опции для даты
+                const dateOptions = {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                };
+
+                // Формируем строку: Дата + Время
+                const dateString = now.toLocaleDateString('ru-RU', dateOptions);
+                const timeString = now.toLocaleTimeString('ru-RU', timeOptions);
+
+                document.getElementById('clock-display').innerText = dateString + ' ' + timeString;
             }
 
-            // Запускаем сразу и ставим интервал 1 секунда (1000 мс)
+            // Запускаем сразу
             updateClock();
-            setInterval(updateClock, 1000);
+
+            // Обновляем раз в 10 секунд (10000 мс)
+            setInterval(updateClock, 10000);
         </script>
     </h:body>
 </f:view>

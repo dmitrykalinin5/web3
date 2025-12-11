@@ -106,7 +106,7 @@
 
                 <p:commandButton value="Проверить точку" action="#{pointBean.checkPoint}"
                                  update="resultsTable x y r"
-                                 oncomplete="updatePointsFromTable();"
+                                 oncomplete="handleFormComplete(xhr, status, args)"
                                  styleClass="submit-btn"/>
 
                 <!-- Скрытые поля для клика по графику -->
