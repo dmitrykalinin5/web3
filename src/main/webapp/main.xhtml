@@ -104,10 +104,9 @@
                     <h:message for="r" styleClass="error-message"/>
                 </div>
 
-                <!-- Обновленная кнопка с oncomplete -->
                 <p:commandButton value="Проверить точку" action="#{pointBean.checkPoint}"
                                  update="resultsTable x y r"
-                                 oncomplete="handleFormComplete(xhr, status, args)"
+                                 oncomplete="updatePointsFromTable();"
                                  styleClass="submit-btn"/>
 
                 <!-- Скрытые поля для клика по графику -->

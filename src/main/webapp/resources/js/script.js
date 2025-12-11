@@ -201,10 +201,13 @@ function drawLabels(ctx, centerX, centerY, scale, r) {
 }
 
 function drawPoints(ctx, centerX, centerY, scale, r, pointsToDraw) {
+    console.log(`Drawing ${pointsToDraw.length} points for R=${r}`);
+
     pointsToDraw.forEach(point => {
         const x = centerX + point.x * scale;
         const y = centerY - point.y * scale;
 
+        console.log(`Point: (${point.x}, ${point.y}) -> (${x}, ${y}), hit: ${point.hit}`);
         // Проверяем, что точка в пределах канваса
         if (x >= 0 && x <= ctx.canvas.width && y >= 0 && y <= ctx.canvas.height) {
             ctx.fillStyle = point.hit ? '#28a745' : '#dc3545';
@@ -242,7 +245,7 @@ function addRow(rowData) {
         <td class="execution-time">${rowData.executionTime}</td>
     `;
 
-    // Сохраняем точку с правильными данными
+    // Немедленно добавляем точку на график
     addPointToGraph(parseFloat(rowData.x), parseFloat(rowData.y), rowData.hit, parseFloat(rowData.r));
 }
 
@@ -396,6 +399,41 @@ function updateGraphAfterSubmit() {
     loadPointsFromTable();
 
     // Перерисовываем график
+    drawGraph(currentR);
+}
+
+// Функция для обновления точек после AJAX-запроса
+function updatePointsFromTable() {
+    const table = document.getElementById('resultsTable_data'); // ID таблицы PrimeFaces
+    if (!table) {
+        console.log('Table not found, waiting...');
+        setTimeout(updatePointsFromTable, 500);
+        return;
+    }
+
+    points = [];
+    const rows = table.querySelectorAll('tr.ui-widget-content');
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 5) {
+            try {
+                const x = parseFloat(cells[0].textContent.trim());
+                const y = parseFloat(cells[1].textContent.trim());
+                const r = parseFloat(cells[2].textContent.trim());
+                const hitText = cells[3].textContent.trim();
+                const hit = hitText.includes('Попадание');
+
+                if (!isNaN(x) && !isNaN(y) && !isNaN(r)) {
+                    points.push({ x, y, r, hit });
+                }
+            } catch (e) {
+                console.error('Error parsing row:', e);
+            }
+        }
+    });
+
+    console.log('Points updated from table:', points);
     drawGraph(currentR);
 }
 
@@ -695,6 +733,7 @@ function initCanvasClickHandler() {
         } else {
             console.error('Graph submit button not found');
         }
+        setTimeout(updatePointsFromTable, 500);
     });
 }
 
@@ -1093,18 +1132,27 @@ function observeTableChanges() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Page loaded, initializing graph...');
+    console.log('Page loaded, initializing...');
 
-    // Загружаем начальные точки из таблицы
-    loadPointsFromTable();
+    // Загружаем начальные точки
+    updatePointsFromTable();
 
-    // Рисуем график
-    drawGraph(currentR);
+    // Наблюдаем за изменениями в таблице
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                console.log('Table updated, refreshing points');
+                setTimeout(updatePointsFromTable, 100);
+            }
+        });
+    });
 
-    // Начинаем наблюдать за изменениями таблицы
-    observeTableChanges();
+    const table = document.getElementById('resultsTable_data');
+    if (table) {
+        observer.observe(table, { childList: true, subtree: true });
+    }
 
-    // Инициализируем обработчики
+    // Инициализация обработчиков
     initFormHandlers();
     initCanvasClickHandler();
 
