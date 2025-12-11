@@ -10,9 +10,51 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <h:outputStylesheet library="css" name="styles.css"/>
         <h:outputScript library="js" name="script.js"/>
-        <!-- Fallback на случай проблем с JSF ресурсами -->
-        <link rel="stylesheet" type="text/css" href="#{facesContext.externalContext.requestContextPath}/resources/css/styles.css"/>
-        <script type="text/javascript" src="#{facesContext.externalContext.requestContextPath}/resources/js/script.js"></script>
+
+        <!-- Добавьте этот скрипт для обработки PrimeFaces -->
+        <script type="text/javascript">
+            function handleFormComplete(xhr, status, args) {
+                if (args &amp;&amp; !args.validationFailed) {
+                    // Обновляем график после успешной отправки
+                    updateGraphAfterSubmit();
+
+                    // Очищаем сообщения об ошибках
+                    hideValidationError();
+
+                    // Показываем уведомление об успехе
+                    showSuccessMessage("Точка успешно проверена!");
+                }
+            }
+
+            function showSuccessMessage(message) {
+                // Создаем уведомление об успехе
+                const notification = document.createElement('div');
+                notification.className = 'success-notification';
+                notification.textContent = message;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #28a745;
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 10px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    z-index: 10000;
+                    font-weight: 600;
+                    animation: slideInRight 0.3s ease-out;
+                `;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideOutRight 0.3s ease-in';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+        </script>
     </h:head>
     <h:body>
         <div class="container">
@@ -58,22 +100,33 @@
                         <f:selectItem itemValue="2" itemLabel="2"/>
                         <f:selectItem itemValue="2.5" itemLabel="2.5"/>
                         <f:selectItem itemValue="3" itemLabel="3"/>
-                        <p:ajax event="change" update="@none" oncomplete="updateGraphFromR()"/>
                     </p:selectOneMenu>
                     <h:message for="r" styleClass="error-message"/>
                 </div>
 
+                <!-- Обновленная кнопка с oncomplete -->
                 <p:commandButton value="Проверить точку" action="#{pointBean.checkPoint}"
-                                 update="resultsTable" styleClass="submit-btn"/>
-                
-                <!-- Скрытая кнопка для отправки данных с графика -->
-                <p:commandButton id="graphSubmitBtn" action="#{pointBean.checkPoint}"
-                                 update="resultsTable" style="display:none;"/>
+                                 update="resultsTable x y r"
+                                 oncomplete="handleFormComplete(xhr, status, args)"
+                                 styleClass="submit-btn"/>
+
+                <!-- Скрытые поля для клика по графику -->
+                <h:inputHidden id="graphX" value="#{pointBean.graphX}"/>
+                <h:inputHidden id="graphY" value="#{pointBean.graphY}"/>
+
+                <!-- Скрытая кнопка для графика -->
+                <p:commandButton id="graphSubmitBtn" action="#{pointBean.checkPointFromGraph}"
+                                 update="resultsTable"
+                                 oncomplete="handleFormComplete(xhr, status, args)"
+                                 style="display:none;"/>
             </h:form>
 
             <div class="graph-section">
                 <h3>График области</h3>
                 <canvas id="graphCanvas" width="400" height="400"></canvas>
+                <div class="graph-instructions">
+                    <small>Кликните на графике, чтобы добавить точку. Значение X будет автоматически округлено.</small>
+                </div>
             </div>
 
             <div class="results-section">
@@ -84,10 +137,14 @@
                         <h:outputText value="#{result.x}"/>
                     </p:column>
                     <p:column headerText="Y">
-                        <h:outputText value="#{result.y}"/>
+                        <h:outputText value="#{result.y}">
+                            <f:convertNumber maxFractionDigits="2"/>
+                        </h:outputText>
                     </p:column>
                     <p:column headerText="R">
-                        <h:outputText value="#{result.r}"/>
+                        <h:outputText value="#{result.r}">
+                            <f:convertNumber maxFractionDigits="2"/>
+                        </h:outputText>
                     </p:column>
                     <p:column headerText="Результат">
                         <h:outputText value="#{result.hit ? 'Попадание' : 'Промах'}"
@@ -95,7 +152,7 @@
                     </p:column>
                     <p:column headerText="Время">
                         <h:outputText value="#{result.timestamp}">
-                            <f:convertDateTime pattern="HH:mm:ss"/>
+                            <f:convertDateTime pattern="HH:mm:ss" timeZone="Europe/Moscow"/>
                         </h:outputText>
                     </p:column>
                 </p:dataTable>

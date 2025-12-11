@@ -2,10 +2,12 @@ package org.backend.model;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Entity
-@Table(name = "point_result") // Изменяю имя таблицы
+@Table(name = "point_result")
 public class PointResult implements Serializable {
 
     @Id
@@ -25,7 +27,7 @@ public class PointResult implements Serializable {
     private Boolean hit;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "timestamp_col") // timestamp может быть зарезервированным словом
+    @Column(name = "timestamp_col")
     private Date timestamp;
 
     // Конструкторы
@@ -55,13 +57,19 @@ public class PointResult implements Serializable {
     public Boolean getHit() { return hit; }
     public void setHit(Boolean hit) { this.hit = hit; }
 
+    // Добавьте метод isHit() для совместимости
+    public boolean isHit() {
+        return hit != null && hit;
+    }
+
     public Date getTimestamp() { return timestamp; }
     public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
 
-    // Уберите formattedTime из JPA, сделайте transient
     @Transient
     public String getFormattedTime() {
         if (timestamp == null) return "";
-        return new java.text.SimpleDateFormat("HH:mm:ss").format(timestamp);
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+        return sdf.format(timestamp);
     }
 }

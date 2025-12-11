@@ -1,5 +1,4 @@
 let currentR = 3;
-
 let points = [];
 
 const baseUrl = window.contextPath || '';
@@ -13,100 +12,6 @@ function getCanvas() {
 function getCtx() {
     const canvas = getCanvas();
     return canvas ? canvas.getContext('2d') : null;
-}
-
-function drawGraph(r) {
-    const canvas = getCanvas();
-    const ctx = getCtx();
-    if (!canvas || !ctx) {
-        console.warn('Canvas or context not available');
-        return;
-    }
-    const width = canvas.width;
-    const height = canvas.height;
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const scale = 180 / (r || 3);
-
-    console.log('Drawing graph with R:', r, 'Scale:', scale);
-
-    ctx.clearRect(0, 0, width, height);
-
-    ctx.fillStyle = '#f8f9fa';
-    ctx.fillRect(0, 0, width, height);
-
-    drawShapes(ctx, centerX, centerY, scale, r);
-
-    drawGrid(ctx, width, height, centerX, centerY, scale, r);
-
-    drawAxes(ctx, width, height, centerX, centerY);
-
-    drawLabels(ctx, centerX, centerY, scale, r);
-
-    drawPoints(ctx, centerX, centerY, scale);
-}
-
-function drawShapes(ctx, centerX, centerY, scale, r) {
-    ctx.fillStyle = 'rgba(102, 126, 234, 0.6)';
-    ctx.strokeStyle = 'rgba(102, 126, 234, 0.8)';
-    ctx.lineWidth = 2;
-
-    // Первая четверть (x >= 0, y >= 0): полукруг радиусом R/2
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, (r/2) * scale, 0, Math.PI / 2, false);
-    ctx.lineTo(centerX, centerY);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // Вторая четверть (x <= 0, y >= 0): треугольник (0,0), (-R/2,0), (0,R/2)
-    ctx.beginPath();
-    ctx.moveTo(centerX, centerY); // (0, 0)
-    ctx.lineTo(centerX - (r/2) * scale, centerY); // (-R/2, 0)
-    ctx.lineTo(centerX, centerY - (r/2) * scale); // (0, R/2)
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // Третья четверть (x <= 0, y <= 0): прямоугольник (0,0), (-R/2,0), (0,-R), (-R/2,-R)
-    ctx.beginPath();
-    ctx.rect(centerX - (r/2) * scale, centerY, (r/2) * scale, r * scale);
-    ctx.fill();
-    ctx.stroke();
-
-    // Четвертая четверть (x >= 0, y <= 0): ничего не рисуем
-}
-
-function drawGrid(ctx, width, height, centerX, centerY, scale, r) {
-    ctx.strokeStyle = '#e0e0e0';
-    ctx.lineWidth = 1;
-
-    const step = (r/2) * scale;
-    for (let x = centerX; x < width; x += step) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-        ctx.stroke();
-    }
-    for (let x = centerX; x > 0; x -= step) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-        ctx.stroke();
-    }
-
-    for (let y = centerY; y < height; y += step) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-        ctx.stroke();
-    }
-    for (let y = centerY; y > 0; y -= step) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-        ctx.stroke();
-    }
 }
 
 function drawAxes(ctx, width, height, centerX, centerY) {
@@ -137,16 +42,106 @@ function drawAxes(ctx, width, height, centerX, centerY) {
     ctx.lineTo(centerX + 5, 10);
     ctx.fill();
 }
+function drawGraph(r) {
+    const canvas = getCanvas();
+    const ctx = getCtx();
+    if (!canvas || !ctx) {
+        console.warn('Canvas or context not available');
+        return;
+    }
+    const width = canvas.width;
+    const height = canvas.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const scale = 150 / (r || 3); // Уменьшим масштаб для 1.5R
+
+    console.log('Drawing graph with R:', r, 'Scale:', scale);
+
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.fillStyle = '#f8f9fa';
+    ctx.fillRect(0, 0, width, height);
+
+    drawShapes(ctx, centerX, centerY, scale, r);
+
+    drawGrid(ctx, width, height, centerX, centerY, scale, r);
+
+    drawAxes(ctx, width, height, centerX, centerY);
+
+    drawLabels(ctx, centerX, centerY, scale, r);
+
+    drawPoints(ctx, centerX, centerY, scale, r);
+}
+
+function drawShapes(ctx, centerX, centerY, scale, r) {
+    ctx.fillStyle = 'rgba(102, 126, 234, 0.6)';
+    ctx.strokeStyle = 'rgba(102, 126, 234, 0.8)';
+    ctx.lineWidth = 2;
+
+    // Первая четверть (x >= 0, y >= 0): четверть круга радиусом R/2
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, (r/2) * scale, 0, Math.PI / 2, false);
+    ctx.lineTo(centerX, centerY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Вторая четверть (x <= 0, y >= 0): треугольник (0,0), (-R/2,0), (0,R/2)
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY); // (0, 0)
+    ctx.lineTo(centerX - (r/2) * scale, centerY); // (-R/2, 0)
+    ctx.lineTo(centerX, centerY - (r/2) * scale); // (0, R/2)
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Третья четверть (x <= 0, y <= 0): прямоугольник R/2 x R
+    ctx.beginPath();
+    ctx.rect(centerX - (r/2) * scale, centerY, (r/2) * scale, r * scale);
+    ctx.fill();
+    ctx.stroke();
+
+    // Четвертая четверть (x >= 0, y <= 0): ничего не рисуем
+}
+
+function drawGrid(ctx, width, height, centerX, centerY, scale, r) {
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 0.5;
+
+    // Убираем 1.5R, оставляем только -R, -R/2, 0, R/2, R
+    const steps = [-r, -r/2, 0, r/2, r];
+
+    steps.forEach(step => {
+        if (step !== 0) { // Не рисуем центральную линию (она уже есть как ось)
+            const x = centerX + step * scale;
+            if (x > 0 && x < width) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+
+            const y = centerY - step * scale;
+            if (y > 0 && y < height) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+        }
+    });
+}
 
 function drawLabels(ctx, centerX, centerY, scale, r) {
     const canvas = getCanvas();
     if (!canvas) return;
-    
+
     ctx.fillStyle = '#333';
-    ctx.font = '14px Arial';
+    ctx.font = '12px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
+    // Убираем 1.5R, оставляем только -R, -R/2, R/2, R
     const xValues = [-r, -r/2, r/2, r];
     for (let value of xValues) {
         const x = centerX + value * scale;
@@ -155,18 +150,21 @@ function drawLabels(ctx, centerX, centerY, scale, r) {
         else if (value === -r/2) label = "-R/2";
         else if (value === r/2) label = "R/2";
         else if (value === r) label = "R";
-        else label = value.toString();
 
         if (x > 20 && x < canvas.width - 20) {
-            ctx.fillText(label, x, centerY + 20);
+            ctx.fillText(label, x, centerY + 15);
 
+            // Маленькая отметка на оси
             ctx.beginPath();
-            ctx.moveTo(x, centerY - 5);
-            ctx.lineTo(x, centerY + 5);
+            ctx.moveTo(x, centerY - 3);
+            ctx.lineTo(x, centerY + 3);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
             ctx.stroke();
         }
     }
 
+    // Аналогично для оси Y: убираем 1.5R
     const yValues = [r, r/2, -r/2, -r];
     for (let value of yValues) {
         const y = centerY - value * scale;
@@ -175,40 +173,61 @@ function drawLabels(ctx, centerX, centerY, scale, r) {
         else if (value === r/2) label = "R/2";
         else if (value === -r/2) label = "-R/2";
         else if (value === -r) label = "-R";
-        else label = value.toString();
 
         if (y > 20 && y < canvas.height - 20) {
-            ctx.fillText(label, centerX - 25, y);
+            ctx.fillText(label, centerX - 20, y);
 
+            // Маленькая отметка на оси
             ctx.beginPath();
-            ctx.moveTo(centerX - 5, y);
-            ctx.lineTo(centerX + 5, y);
+            ctx.moveTo(centerX - 3, y);
+            ctx.lineTo(centerX + 3, y);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
             ctx.stroke();
         }
     }
 
-    ctx.fillText('X', canvas.width - 15, centerY - 15);
-    ctx.fillText('Y', centerX + 15, 15);
+    // Подписи осей
+    ctx.fillText('X', canvas.width - 10, centerY - 10);
+    ctx.fillText('Y', centerX + 15, 10);
 }
 
-function drawPoints(ctx, centerX, centerY, scale) {
-    points.forEach(point => {
+function drawPoints(ctx, centerX, centerY, scale, r) {
+    console.log('Drawing points:', points, 'with R:', r);
+
+    // Фильтруем точки по текущему R
+    const filteredPoints = points.filter(point => {
+        // Сравниваем R точки с текущим R (с небольшой погрешностью)
+        return Math.abs(point.r - r) < 0.001;
+    });
+
+    console.log('Filtered points for R=' + r + ':', filteredPoints);
+
+    filteredPoints.forEach(point => {
         const x = centerX + point.x * scale;
         const y = centerY - point.y * scale;
 
-        ctx.fillStyle = point.hit ? '#28a745' : '#dc3545';
-        ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
-        ctx.fill();
+        // Проверяем, что точка в пределах канваса
+        if (x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height) {
+            ctx.fillStyle = point.hit ? '#28a745' : '#dc3545';
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fill();
 
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 1;
-        ctx.stroke();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            console.log(`Drawn point: (${point.x}, ${point.y}), screen: (${x}, ${y}), hit: ${point.hit}`);
+        } else {
+            console.log(`Point out of bounds: (${point.x}, ${point.y}), screen: (${x}, ${y})`);
+        }
     });
 }
 
-function addPointToGraph(x, y, hit) {
-    points.push({ x, y, hit });
+function addPointToGraph(x, y, hit, r) {
+    // Сохраняем R вместе с точкой для правильной фильтрации
+    points.push({ x, y, hit, r: r || currentR });
     drawGraph(currentR);
 }
 
@@ -227,22 +246,25 @@ function addRow(rowData) {
         <td class="execution-time">${rowData.executionTime}</td>
     `;
 
-    addPointToGraph(rowData.x, rowData.y, rowData.hit);
+    // Сохраняем точку с правильными данными
+    addPointToGraph(parseFloat(rowData.x), parseFloat(rowData.y), rowData.hit, parseFloat(rowData.r));
 }
 
 function convertToMathX(canvasX, R) {
-    const canvas = getCanvas();
+    const canvas = document.getElementById('graphCanvas');
     if (!canvas) return 0;
+
     const centerX = canvas.width / 2;
-    const scale = 180 / (R || 3);
+    const scale = 150 / (R || 3);
     return (canvasX - centerX) / scale;
 }
 
 function convertToMathY(canvasY, R) {
-    const canvas = getCanvas();
+    const canvas = document.getElementById('graphCanvas');
     if (!canvas) return 0;
+
     const centerY = canvas.height / 2;
-    const scale = 180 / (R || 3);
+    const scale = 150 / (R || 3);
     return (centerY - canvasY) / scale;
 }
 
@@ -373,6 +395,14 @@ function clearHistoryOnServer() {
         });
 }
 
+function updateGraphAfterSubmit() {
+    // Перезагружаем точки из таблицы
+    loadPointsFromTable();
+
+    // Перерисовываем график
+    drawGraph(currentR);
+}
+
 window.addEventListener("load", function () {
     console.log('Page loaded, initializing graph and loading global history...');
 
@@ -382,6 +412,11 @@ window.addEventListener("load", function () {
     if (clearHistoryButton) {
         clearHistoryButton.addEventListener('click', clearHistoryOnServer);
     }
+
+    drawGraph(currentR);
+
+    // Загружаем точки из таблицы
+    setTimeout(updateGraphAfterSubmit, 500);
 
     // Инициализация обработчиков формы
     initFormHandlers();
@@ -400,6 +435,17 @@ window.addEventListener("load", function () {
         // Если R не выбран, рисуем график с дефолтным значением для визуализации
         drawGraph(3);
     }
+
+    // Перерисовка графика при изменении R через select
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.id && e.target.id.includes('r')) {
+            const rValue = parseFloat(e.target.value);
+            if (!isNaN(rValue)) {
+                currentR = rValue;
+                drawGraph(currentR);
+            }
+        }
+    });
 });
 
 function showServerError(message) {
@@ -433,9 +479,45 @@ function hideServerError() {
     }
 }
 
+// Функция для отображения ошибок валидации
+function showValidationError(message) {
+    // Можно добавить временное сообщение
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'validation-error-message';
+    errorDiv.textContent = message;
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #dc3545;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        z-index: 10000;
+        animation: fadeIn 0.3s;
+    `;
+
+    document.body.appendChild(errorDiv);
+
+    setTimeout(() => {
+        errorDiv.remove();
+    }, 3000);
+}
+
+function hideValidationError() {
+    // Удаляем все сообщения об ошибках
+    const errors = document.querySelectorAll('.validation-error-message');
+    errors.forEach(error => error.remove());
+}
+
 if (pointForm) {
     pointForm.addEventListener("submit", function (event) {
         let valid = true;
+        const errors = [];
+
+        // Очищаем предыдущие ошибки
+        hideValidationError();
 
         // Валидация полей X (selectOneMenu)
         const xSelect = pointForm.querySelector('select[id*="x"]');
@@ -444,45 +526,61 @@ if (pointForm) {
             if (xError) {
                 xError.textContent = "Выберите значение X.";
             }
+            errors.push("Выберите значение X.");
             valid = false;
         }
 
-        const yInput = document.querySelector("input[name='y']");
-        const yValue = yInput.value.trim();
-        const y = parseFloat(yValue);
-        if (isNaN(y) || y < -3 || y > 5) {
-            document.getElementById("y-error").textContent = "Введите число от -3 до 5.";
+        const yInput = document.querySelector("input[name='y'], input[id*='y']");
+        const yValue = yInput ? yInput.value.trim() : '';
+        if (!yValue) {
+            const yError = document.getElementById("y-error");
+            if (yError) {
+                yError.textContent = "Введите значение Y.";
+            }
+            errors.push("Введите значение Y.");
             valid = false;
+        } else {
+            const y = parseFloat(yValue);
+            if (isNaN(y) || y < -3 || y > 5) {
+                const yError = document.getElementById("y-error");
+                if (yError) {
+                    yError.textContent = "Введите число от -3 до 5.";
+                }
+                errors.push("Y должен быть числом от -3 до 5.");
+                valid = false;
+            }
         }
 
         const rSelect = pointForm.querySelector('select[id*="r"]');
         if (!rSelect || !rSelect.value || rSelect.value === '') {
-            const rError = document.querySelector('[id*="r"]').closest('.form-section')?.querySelector('.error-message');
+            const rError = document.querySelector('[id*="r"]')?.closest('.form-section')?.querySelector('.error-message');
             if (rError) {
                 rError.textContent = "Выберите значение R.";
             }
+            errors.push("Выберите значение R.");
             valid = false;
         }
 
         if (!valid) {
+            // Показываем все ошибки под кнопкой
+            showValidationError(errors.join(' '));
             event.preventDefault();
             return false;
         }
 
-        // Если валидация прошла успешно, форма отправится обычным way
+        // Если валидация прошла успешно, скрываем ошибки
+        hideValidationError();
+        // Форма отправится обычным way
         // и пользователь будет перенаправлен на страницу результата
     });
 }
 
 // Функция для обновления графика при изменении R (вызывается из PrimeFaces AJAX)
 function updateGraphFromR() {
-    const rSelect = document.querySelector('select[id*="r"]');
+    const rSelect = document.querySelector('[id*="r"]');
     if (rSelect && rSelect.value) {
-        const value = parseFloat(rSelect.value);
-        if (value && !isNaN(value)) {
-            currentR = value;
-            drawGraph(currentR);
-        }
+        currentR = parseFloat(rSelect.value);
+        drawGraph(currentR);
     }
 }
 
@@ -496,13 +594,24 @@ function initFormHandlers() {
                 currentR = value;
                 drawGraph(currentR);
             }
+            // Очищаем ошибки при изменении R
+            hideValidationError();
         }
     });
 
     // Обработчик изменения X (selectOneMenu) - используем делегирование
     document.addEventListener('change', function(e) {
         if (e.target && e.target.id && e.target.id.includes('x') && e.target.tagName === 'SELECT') {
-            // X изменен, можно добавить визуальную обратную связь
+            // Очищаем ошибки при изменении X
+            hideValidationError();
+        }
+    });
+
+    // Обработчик изменения Y (inputText) - используем делегирование
+    document.addEventListener('input', function(e) {
+        if (e.target && (e.target.name === 'y' || (e.target.id && e.target.id.includes('y')))) {
+            // Очищаем ошибки при изменении Y
+            hideValidationError();
         }
     });
 }
@@ -517,110 +626,101 @@ if (yField) {
         const regex = /^-?\d*(\.\d*)?$/;
         if (regex.test(value)) {
             lastValidY = value;
-            errorElement.textContent = '';
+            if (errorElement) {
+                errorElement.textContent = '';
+            }
+            // Очищаем ошибки валидации при корректном вводе
+            hideValidationError();
         } else {
-            errorElement.textContent = 'Только числа разрешены';
+            if (errorElement) {
+                errorElement.textContent = 'Только числа разрешены';
+            }
             e.target.value = lastValidY;
         }
     });
 }
 
-// Инициализация обработчика клика на canvas
 function initCanvasClickHandler() {
-    const canvas = getCanvas();
-    if (canvas) {
-        canvas.addEventListener('click', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+    const canvas = document.getElementById('graphCanvas');
+    if (!canvas) return;
 
-            const mathX = convertToMathX(x, currentR);
-            const mathY = convertToMathY(y, currentR);
+    canvas.addEventListener('click', function(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
 
-            hideServerError();
-            document.getElementById("y-error").textContent = "";
+        // Конвертируем координаты канваса в математические
+        const mathX = convertToMathX(x, currentR);
+        const mathY = convertToMathY(y, currentR);
 
-            if (mathY < -3 || mathY > 5) {
-                document.getElementById("y-error").textContent = "Y должен быть в диапазоне от -3 до 5";
-                return;
+        console.log(`Canvas click: screen (${x}, ${y}) -> math (${mathX.toFixed(2)}, ${mathY.toFixed(2)})`);
+
+        // Проверяем, что Y в допустимом диапазоне
+        if (mathY < -3 || mathY > 5) {
+            showValidationError(`Y должен быть от -3 до 5. Получено: ${mathY.toFixed(2)}`);
+            return;
+        }
+
+        // Округляем X до ближайшего допустимого значения
+        const validX = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
+        let roundedX = validX[0];
+        let minDiff = Math.abs(mathX - roundedX);
+
+        for (let i = 1; i < validX.length; i++) {
+            const diff = Math.abs(mathX - validX[i]);
+            if (diff < minDiff) {
+                minDiff = diff;
+                roundedX = validX[i];
             }
+        }
 
-            const validX = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
-            let roundedX = validX[0];
-            let minDiff = Math.abs(mathX - roundedX);
+        // Заполняем скрытые поля формы
+        const graphXInput = document.querySelector('[id*="graphX"]');
+        const graphYInput = document.querySelector('[id*="graphY"]');
+        const rInput = document.querySelector('[id*="r"]');
 
-            for (let i = 1; i < validX.length; i++) {
-                const diff = Math.abs(mathX - validX[i]);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    roundedX = validX[i];
-                }
-            }
+        if (graphXInput) graphXInput.value = roundedX;
+        if (graphYInput) graphYInput.value = mathY.toFixed(4);
+        if (rInput && !rInput.value) {
+            // Если R не выбран, устанавливаем текущий
+            rInput.value = currentR;
+        }
 
-            if (currentR) {
-                submitPointFromGraph(roundedX, mathY, currentR);
-            } else {
-                document.getElementById("r-error").textContent = "Сначала выберите радиус R";
-            }
-        });
-    }
+        // Отправляем форму через скрытую кнопку
+        const graphSubmitBtn = document.querySelector('[id*="graphSubmitBtn"]');
+        if (graphSubmitBtn) {
+            // Активируем кнопку
+            graphSubmitBtn.click();
+        } else {
+            console.error('Graph submit button not found');
+        }
+    });
 }
 
 function submitPointFromGraph(x, y, r) {
-    if (!pointForm) {
-        return;
-    }
+    if (!pointForm) return;
 
-    // Обновление X (selectOneMenu)
-    const xSelect = pointForm.querySelector('select[id*="x"]');
-    if (xSelect) {
-        xSelect.value = x.toString();
-        xSelect.dispatchEvent(new Event('change', { bubbles: true }));
-    }
+    // Обновляем значения в форме
+    const xSelect = document.querySelector('[id*="x"]');
+    const yInput = document.querySelector('[id*="y"]');
+    const rSelect = document.querySelector('[id*="r"]');
 
-    // Обновление Y (inputText)
-    const yInput = pointForm.querySelector("input[name='y'], input[id*='y']");
-    if (yInput) {
-        yInput.value = (Math.round(y * 1000) / 1000).toString();
-    }
+    if (xSelect) xSelect.value = x;
+    if (yInput) yInput.value = y;
+    if (rSelect) rSelect.value = r;
 
-    // Обновление R (selectOneMenu)
-    const rSelect = pointForm.querySelector('select[id*="r"]');
-    if (rSelect) {
-        rSelect.value = r.toString();
-        rSelect.dispatchEvent(new Event('change', { bubbles: true }));
-        // Обновляем график после изменения R
-        if (r) {
-            currentR = parseFloat(r);
-            drawGraph(currentR);
-        }
-    }
-
-    // Отправка формы через PrimeFaces AJAX
-    // Используем скрытую кнопку для AJAX-отправки
-    const graphSubmitBtn = document.getElementById('pointForm:graphSubmitBtn');
-    if (graphSubmitBtn) {
-        // PrimeFaces команда для AJAX-отправки
-        if (typeof PrimeFaces !== 'undefined' && PrimeFaces.ajax) {
-            PrimeFaces.ajax.Request.handle({
-                source: graphSubmitBtn,
-                event: 'click',
-                process: 'pointForm',
-                update: 'resultsTable'
-            });
-        } else {
-            graphSubmitBtn.click();
-        }
-    } else {
-        // Fallback на обычную отправку
-        const submitButton = pointForm.querySelector('button[type="submit"], input[type="submit"]');
-        if (submitButton) {
-            submitButton.click();
-        } else if (typeof pointForm.requestSubmit === 'function') {
-            pointForm.requestSubmit();
-        } else {
-            pointForm.submit();
-        }
+    // Ищем и вызываем команду PrimeFaces
+    const submitButton = document.querySelector('[id*="checkPoint"]');
+    if (submitButton && typeof PrimeFaces !== 'undefined') {
+        // Используем PrimeFaces AJAX
+        PrimeFaces.ajax.AjaxRequest({
+            source: submitButton,
+            process: submitButton.id,
+            update: 'resultsTable',
+            oncomplete: function() {
+                updateGraphAfterSubmit();
+            }
+        });
     }
 }
 
@@ -931,8 +1031,58 @@ function createFloatingConsultants() {
     }
 }
 
+function loadPointsFromTable() {
+    const table = document.getElementById('resultsTable');
+    if (!table) return;
+
+    points = [];
+
+    // Ищем строки с результатами
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 4) {
+            const x = parseFloat(cells[0].textContent);
+            const y = parseFloat(cells[1].textContent);
+            const r = parseFloat(cells[2].textContent);
+
+            // Исправьте проверку hit - ищите текст правильно
+            const hitText = cells[3].textContent.trim();
+            const hit = hitText.includes('Попадание') || hitText.toLowerCase().includes('hit');
+
+            if (!isNaN(x) && !isNaN(y) && !isNaN(r)) {
+                points.push({ x, y, r, hit });
+                console.log(`Loaded point: (${x}, ${y}), R=${r}, hit=${hit}`);
+            }
+        }
+    });
+
+    console.log(`Total points loaded: ${points.length}`);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    initCookieConsent();
-    initChatWidget();
-    createFloatingConsultants();
+    console.log('Page loaded, initializing graph...');
+
+    // Загружаем начальные точки из таблицы
+    loadPointsFromTable();
+
+    // Рисуем график
+    drawGraph(currentR);
+
+    // Инициализируем обработчики
+    initFormHandlers();
+    initCanvasClickHandler();
+
+    // Следим за изменениями R
+    const rSelect = document.querySelector('[id*="r"]');
+    if (rSelect) {
+        rSelect.addEventListener('change', function() {
+            const value = parseFloat(this.value);
+            if (!isNaN(value)) {
+                currentR = value;
+                drawGraph(currentR);
+            }
+        });
+    }
 });
+

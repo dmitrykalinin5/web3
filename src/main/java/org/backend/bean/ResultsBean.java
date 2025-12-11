@@ -24,14 +24,13 @@ public class ResultsBean implements Serializable {
     }
 
     public void addResult(PointResult result) {
-        // Метод saveResult больше не существует в PointService
-        // Вместо этого, если нужно сохранить существующий результат,
-        // нужно пересоздать его или изменить логику
+        pointService.saveResult(result);
         loadAllResults();
     }
 
     public void loadAllResults() {
         allResults = pointService.getAllResults();
+        System.out.println("Loaded " + allResults.size() + " results from database");
     }
 
     public List<PointResult> getAllResults() {
