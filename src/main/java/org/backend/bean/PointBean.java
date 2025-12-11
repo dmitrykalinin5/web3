@@ -28,23 +28,19 @@ public class PointBean implements Serializable {
     private ResultsBean resultsBean;
 
     public String checkPoint() {
-        System.out.println("Checking point: x=" + x + ", y=" + y + ", r=" + r);
+        System.out.println("=== Checking point ===");
+        System.out.println("x: " + x);
+        System.out.println("y: " + y);
+        System.out.println("r: " + r);
 
         if (isValid()) {
             PointResult result = pointService.checkPoint(x, y, r);
-            System.out.println("Result: " + (result.isHit() ? "Hit" : "Miss"));
+            System.out.println("Result saved: " + result);
+            System.out.println("Hit: " + result.isHit());
 
             // Загружаем обновленные результаты
             resultsBean.loadAllResults();
-
-            // Очищаем поля формы (опционально)
-            // x = null;
-            // y = null;
-        } else {
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                            "Ошибка валидации",
-                            "Проверьте правильность введенных данных. Y должен быть от -3 до 5."));
+            System.out.println("Total results in DB: " + resultsBean.getAllResults().size());
         }
         return null;
     }

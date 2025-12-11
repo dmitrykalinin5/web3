@@ -132,7 +132,7 @@
             <div class="results-section">
                 <h3>Результаты проверок</h3>
                 <p:dataTable id="resultsTable" value="#{resultsBean.allResults}" var="result"
-                             styleClass="results-table" paginator="true" rows="10">
+                             styleClass="results-table" paginator="true" rows="10" widgetVar="resultsTableWidget">
                     <p:column headerText="X">
                         <h:outputText value="#{result.x}"/>
                     </p:column>

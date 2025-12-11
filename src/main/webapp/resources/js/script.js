@@ -42,6 +42,7 @@ function drawAxes(ctx, width, height, centerX, centerY) {
     ctx.lineTo(centerX + 5, 10);
     ctx.fill();
 }
+
 function drawGraph(r) {
     const canvas = getCanvas();
     const ctx = getCtx();
@@ -49,29 +50,36 @@ function drawGraph(r) {
         console.warn('Canvas or context not available');
         return;
     }
+
     const width = canvas.width;
     const height = canvas.height;
     const centerX = width / 2;
     const centerY = height / 2;
-    const scale = 150 / (r || 3); // Уменьшим масштаб для 1.5R
+    const scale = 150 / (r || 3);
 
     console.log('Drawing graph with R:', r, 'Scale:', scale);
+    console.log('Available points:', points);
 
     ctx.clearRect(0, 0, width, height);
-
     ctx.fillStyle = '#f8f9fa';
     ctx.fillRect(0, 0, width, height);
 
     drawShapes(ctx, centerX, centerY, scale, r);
-
     drawGrid(ctx, width, height, centerX, centerY, scale, r);
-
     drawAxes(ctx, width, height, centerX, centerY);
-
     drawLabels(ctx, centerX, centerY, scale, r);
 
-    drawPoints(ctx, centerX, centerY, scale, r);
+    // Фильтруем точки по текущему R
+    const filteredPoints = points.filter(point => {
+        // Используем небольшую погрешность для сравнения чисел с плавающей точкой
+        return Math.abs(point.r - r) < 0.001;
+    });
+
+    console.log(`Filtered points for R=${r}:`, filteredPoints);
+
+    drawPoints(ctx, centerX, centerY, scale, r, filteredPoints);
 }
+
 
 function drawShapes(ctx, centerX, centerY, scale, r) {
     ctx.fillStyle = 'rgba(102, 126, 234, 0.6)';
@@ -192,23 +200,13 @@ function drawLabels(ctx, centerX, centerY, scale, r) {
     ctx.fillText('Y', centerX + 15, 10);
 }
 
-function drawPoints(ctx, centerX, centerY, scale, r) {
-    console.log('Drawing points:', points, 'with R:', r);
-
-    // Фильтруем точки по текущему R
-    const filteredPoints = points.filter(point => {
-        // Сравниваем R точки с текущим R (с небольшой погрешностью)
-        return Math.abs(point.r - r) < 0.001;
-    });
-
-    console.log('Filtered points for R=' + r + ':', filteredPoints);
-
-    filteredPoints.forEach(point => {
+function drawPoints(ctx, centerX, centerY, scale, r, pointsToDraw) {
+    pointsToDraw.forEach(point => {
         const x = centerX + point.x * scale;
         const y = centerY - point.y * scale;
 
         // Проверяем, что точка в пределах канваса
-        if (x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height) {
+        if (x >= 0 && x <= ctx.canvas.width && y >= 0 && y <= ctx.canvas.height) {
             ctx.fillStyle = point.hit ? '#28a745' : '#dc3545';
             ctx.beginPath();
             ctx.arc(x, y, 4, 0, Math.PI * 2);
@@ -219,8 +217,6 @@ function drawPoints(ctx, centerX, centerY, scale, r) {
             ctx.stroke();
 
             console.log(`Drawn point: (${point.x}, ${point.y}), screen: (${x}, ${y}), hit: ${point.hit}`);
-        } else {
-            console.log(`Point out of bounds: (${point.x}, ${point.y}), screen: (${x}, ${y})`);
         }
     });
 }
@@ -644,6 +640,11 @@ function initCanvasClickHandler() {
     const canvas = document.getElementById('graphCanvas');
     if (!canvas) return;
 
+    const rSelect = document.querySelector('[id*="r"]');
+    if (rSelect && rSelect.value) {
+        currentR = parseFloat(rSelect.value);
+    }
+
     canvas.addEventListener('click', function(event) {
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
@@ -1032,32 +1033,63 @@ function createFloatingConsultants() {
 }
 
 function loadPointsFromTable() {
-    const table = document.getElementById('resultsTable');
-    if (!table) return;
+    const table = document.getElementById('resultsTable:resultsTable_data'); // Обратите внимание на ID!
+    if (!table) {
+        console.log('Results table not found');
+        return;
+    }
 
     points = [];
 
-    // Ищем строки с результатами
-    const rows = table.querySelectorAll('tbody tr');
-    rows.forEach(row => {
+    // Ищем строки с результатами (PrimeFaces добавляет свои классы)
+    const rows = table.querySelectorAll('tr');
+    console.log(`Found ${rows.length} rows in table`);
+
+    rows.forEach((row, index) => {
         const cells = row.querySelectorAll('td');
-        if (cells.length >= 4) {
-            const x = parseFloat(cells[0].textContent);
-            const y = parseFloat(cells[1].textContent);
-            const r = parseFloat(cells[2].textContent);
+        if (cells.length >= 5) { // 5 колонок: X, Y, R, Результат, Время
+            try {
+                const xText = cells[0].textContent.trim();
+                const yText = cells[1].textContent.trim();
+                const rText = cells[2].textContent.trim();
+                const hitText = cells[3].textContent.trim();
 
-            // Исправьте проверку hit - ищите текст правильно
-            const hitText = cells[3].textContent.trim();
-            const hit = hitText.includes('Попадание') || hitText.toLowerCase().includes('hit');
+                const x = parseFloat(xText);
+                const y = parseFloat(yText.replace(',', '.'));
+                const r = parseFloat(rText.replace(',', '.'));
 
-            if (!isNaN(x) && !isNaN(y) && !isNaN(r)) {
-                points.push({ x, y, r, hit });
-                console.log(`Loaded point: (${x}, ${y}), R=${r}, hit=${hit}`);
+                const hit = hitText.includes('Попадание') || hitText.toLowerCase().includes('hit');
+
+                if (!isNaN(x) && !isNaN(y) && !isNaN(r)) {
+                    points.push({ x, y, r, hit });
+                    console.log(`Loaded point ${index}: (${x}, ${y}), R=${r}, hit=${hit}`);
+                } else {
+                    console.warn(`Invalid point at row ${index}: x=${xText}, y=${yText}, r=${rText}`);
+                }
+            } catch (e) {
+                console.error(`Error parsing row ${index}:`, e);
             }
         }
     });
 
     console.log(`Total points loaded: ${points.length}`);
+}
+
+function observeTableChanges() {
+    const table = document.getElementById('resultsTable');
+    if (!table) return;
+
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                console.log('Table changed, reloading points');
+                loadPointsFromTable();
+                drawGraph(currentR);
+            }
+        });
+    });
+
+    observer.observe(table, { childList: true, subtree: true });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1068,6 +1100,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Рисуем график
     drawGraph(currentR);
+
+    // Начинаем наблюдать за изменениями таблицы
+    observeTableChanges();
 
     // Инициализируем обработчики
     initFormHandlers();
@@ -1085,4 +1120,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
