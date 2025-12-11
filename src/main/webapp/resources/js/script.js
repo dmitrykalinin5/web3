@@ -402,7 +402,6 @@ function updateGraphAfterSubmit() {
     drawGraph(currentR);
 }
 
-// Функция для обновления точек после AJAX-запроса
 function updatePointsFromTable() {
     const table = document.getElementById('resultsTable_data'); // ID таблицы PrimeFaces
     if (!table) {
@@ -412,17 +411,22 @@ function updatePointsFromTable() {
     }
 
     points = [];
-    const rows = table.querySelectorAll('tr.ui-widget-content');
+    const rows = table.querySelectorAll('tr'); // PrimeFaces строки
 
     rows.forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length >= 5) {
             try {
-                const x = parseFloat(cells[0].textContent.trim());
-                const y = parseFloat(cells[1].textContent.trim());
-                const r = parseFloat(cells[2].textContent.trim());
+                // ВАЖНО: Заменяем запятую на точку перед парсингом!
+                const xText = cells[0].textContent.trim().replace(',', '.');
+                const yText = cells[1].textContent.trim().replace(',', '.');
+                const rText = cells[2].textContent.trim().replace(',', '.');
+
+                const x = parseFloat(xText);
+                const y = parseFloat(yText);
+                const r = parseFloat(rText);
                 const hitText = cells[3].textContent.trim();
-                const hit = hitText.includes('Попадание');
+                const hit = hitText.includes('Попадание') || hitText.toLowerCase().includes('hit'); // Добавил проверку на разные варианты
 
                 if (!isNaN(x) && !isNaN(y) && !isNaN(r)) {
                     points.push({ x, y, r, hit });
@@ -684,6 +688,12 @@ function initCanvasClickHandler() {
     }
 
     canvas.addEventListener('click', function(event) {
+        // Обновляем R перед кликом на всякий случай
+        const currentRSelect = document.querySelector('[id*="r"]');
+        if (currentRSelect && currentRSelect.value) {
+            currentR = parseFloat(currentRSelect.value);
+        }
+
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
@@ -694,46 +704,36 @@ function initCanvasClickHandler() {
 
         console.log(`Canvas click: screen (${x}, ${y}) -> math (${mathX.toFixed(2)}, ${mathY.toFixed(2)})`);
 
-        // Проверяем, что Y в допустимом диапазоне
+        // Проверяем, что точка в допустимом диапазоне (общая валидация)
         if (mathY < -3 || mathY > 5) {
             showValidationError(`Y должен быть от -3 до 5. Получено: ${mathY.toFixed(2)}`);
             return;
         }
-
-        // Округляем X до ближайшего допустимого значения
-        const validX = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
-        let roundedX = validX[0];
-        let minDiff = Math.abs(mathX - roundedX);
-
-        for (let i = 1; i < validX.length; i++) {
-            const diff = Math.abs(mathX - validX[i]);
-            if (diff < minDiff) {
-                minDiff = diff;
-                roundedX = validX[i];
-            }
+        if (mathX < -4 || mathX > 4) {
+            showValidationError(`X должен быть от -4 до 4. Получено: ${mathX.toFixed(2)}`);
+            return;
         }
+
+        // УБРАНО ОКРУГЛЕНИЕ X. Теперь отправляем точные координаты.
 
         // Заполняем скрытые поля формы
         const graphXInput = document.querySelector('[id*="graphX"]');
         const graphYInput = document.querySelector('[id*="graphY"]');
-        const rInput = document.querySelector('[id*="r"]');
 
-        if (graphXInput) graphXInput.value = roundedX;
+        // Округляем до 4 знаков для красоты передачи, но не до целых
+        if (graphXInput) graphXInput.value = mathX.toFixed(4);
         if (graphYInput) graphYInput.value = mathY.toFixed(4);
-        if (rInput && !rInput.value) {
-            // Если R не выбран, устанавливаем текущий
-            rInput.value = currentR;
-        }
 
         // Отправляем форму через скрытую кнопку
         const graphSubmitBtn = document.querySelector('[id*="graphSubmitBtn"]');
         if (graphSubmitBtn) {
-            // Активируем кнопку
             graphSubmitBtn.click();
         } else {
             console.error('Graph submit button not found');
         }
-        setTimeout(updatePointsFromTable, 500);
+
+        // Ожидаем обновления таблицы
+        // setTimeout(updatePointsFromTable, 500); // Это делает oncomplete кнопки, можно убрать или оставить для надежности
     });
 }
 

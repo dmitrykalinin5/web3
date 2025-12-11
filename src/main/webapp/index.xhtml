@@ -8,10 +8,10 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <h:outputStylesheet name="css/styles.css"/>
-        <!-- Fallback на случай проблем с JSF ресурсами -->
         <link rel="stylesheet" type="text/css" href="#{facesContext.externalContext.requestContextPath}/resources/css/styles.css"/>
     </h:head>
     <h:body>
+
         <div class="container">
             <div class="header">
                 <h1>Калинин Дмитрий Викторович</h1>
@@ -20,9 +20,9 @@
 
             <div class="clock-container">
                 <h3>Текущее время:</h3>
-                <h:outputText value="#{timeBean.currentTime}">
-                    <f:convertDateTime pattern="dd.MM.yyyy HH:mm:ss" timeZone="Europe/Moscow"/>
-                </h:outputText>
+                <div id="clock-display" style="font-size: 2em; font-weight: bold; color: #333; margin: 20px 0;">
+                    Загрузка времени...
+                </div>
             </div>
 
             <div class="navigation">
@@ -31,10 +31,25 @@
         </div>
 
         <script>
-            // Обновление времени каждые 10 секунд
-            setInterval(function() {
-                window.location.reload();
-            }, 10000);
+            function updateClock() {
+                const now = new Date();
+                const options = {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    timeZone: 'Europe/Moscow'
+                };
+                // Обновляем текст внутри div
+                document.getElementById('clock-display').innerText = now.toLocaleTimeString('ru-RU', options);
+
+                // Обновляем дату, если нужно, или просто оставляем время
+                // const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                // document.getElementById('date-display').innerText = now.toLocaleDateString('ru-RU', dateOptions);
+            }
+
+            // Запускаем сразу и ставим интервал 1 секунда (1000 мс)
+            updateClock();
+            setInterval(updateClock, 1000);
         </script>
     </h:body>
 </f:view>

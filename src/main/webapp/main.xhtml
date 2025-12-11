@@ -115,6 +115,7 @@
 
                 <!-- Скрытая кнопка для графика -->
                 <p:commandButton id="graphSubmitBtn" action="#{pointBean.checkPointFromGraph}"
+                                 process="@this graphX graphY r"
                                  update="resultsTable"
                                  oncomplete="handleFormComplete(xhr, status, args)"
                                  style="display:none;"/>
