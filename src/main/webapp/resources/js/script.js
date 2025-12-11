@@ -1,14 +1,25 @@
 let currentR = 3;
-const canvas = document.getElementById('graphCanvas');
-const ctx = canvas ? canvas.getContext('2d') : null;
 
 let points = [];
 
 const baseUrl = window.contextPath || '';
 const pointForm = document.getElementById('pointForm');
 
+// Функции для получения canvas и ctx динамически
+function getCanvas() {
+    return document.getElementById('graphCanvas');
+}
+
+function getCtx() {
+    const canvas = getCanvas();
+    return canvas ? canvas.getContext('2d') : null;
+}
+
 function drawGraph(r) {
+    const canvas = getCanvas();
+    const ctx = getCtx();
     if (!canvas || !ctx) {
+        console.warn('Canvas or context not available');
         return;
     }
     const width = canvas.width;
@@ -128,6 +139,9 @@ function drawAxes(ctx, width, height, centerX, centerY) {
 }
 
 function drawLabels(ctx, centerX, centerY, scale, r) {
+    const canvas = getCanvas();
+    if (!canvas) return;
+    
     ctx.fillStyle = '#333';
     ctx.font = '14px Arial';
     ctx.textAlign = 'center';
@@ -217,12 +231,16 @@ function addRow(rowData) {
 }
 
 function convertToMathX(canvasX, R) {
+    const canvas = getCanvas();
+    if (!canvas) return 0;
     const centerX = canvas.width / 2;
     const scale = 180 / (R || 3);
     return (canvasX - centerX) / scale;
 }
 
 function convertToMathY(canvasY, R) {
+    const canvas = getCanvas();
+    if (!canvas) return 0;
     const centerY = canvas.height / 2;
     const scale = 180 / (R || 3);
     return (centerY - canvasY) / scale;
@@ -368,6 +386,9 @@ window.addEventListener("load", function () {
     // Инициализация обработчиков формы
     initFormHandlers();
 
+    // Инициализация обработчика клика на canvas
+    initCanvasClickHandler();
+
     // Установка начального значения R и отрисовка графика
     const defaultR = document.querySelector('select[id*="r"]');
     if (defaultR && defaultR.value) {
@@ -504,41 +525,45 @@ if (yField) {
     });
 }
 
-if (canvas) {
-    canvas.addEventListener('click', function(event) {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+// Инициализация обработчика клика на canvas
+function initCanvasClickHandler() {
+    const canvas = getCanvas();
+    if (canvas) {
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
 
-        const mathX = convertToMathX(x, currentR);
-        const mathY = convertToMathY(y, currentR);
+            const mathX = convertToMathX(x, currentR);
+            const mathY = convertToMathY(y, currentR);
 
-        hideServerError();
-        document.getElementById("y-error").textContent = "";
+            hideServerError();
+            document.getElementById("y-error").textContent = "";
 
-        if (mathY < -3 || mathY > 5) {
-            document.getElementById("y-error").textContent = "Y должен быть в диапазоне от -3 до 5";
-            return;
-        }
-
-        const validX = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
-        let roundedX = validX[0];
-        let minDiff = Math.abs(mathX - roundedX);
-
-        for (let i = 1; i < validX.length; i++) {
-            const diff = Math.abs(mathX - validX[i]);
-            if (diff < minDiff) {
-                minDiff = diff;
-                roundedX = validX[i];
+            if (mathY < -3 || mathY > 5) {
+                document.getElementById("y-error").textContent = "Y должен быть в диапазоне от -3 до 5";
+                return;
             }
-        }
 
-        if (currentR) {
-            submitPointFromGraph(roundedX, mathY, currentR);
-        } else {
-            document.getElementById("r-error").textContent = "Сначала выберите радиус R";
-        }
-    });
+            const validX = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
+            let roundedX = validX[0];
+            let minDiff = Math.abs(mathX - roundedX);
+
+            for (let i = 1; i < validX.length; i++) {
+                const diff = Math.abs(mathX - validX[i]);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    roundedX = validX[i];
+                }
+            }
+
+            if (currentR) {
+                submitPointFromGraph(roundedX, mathY, currentR);
+            } else {
+                document.getElementById("r-error").textContent = "Сначала выберите радиус R";
+            }
+        });
+    }
 }
 
 function submitPointFromGraph(x, y, r) {
