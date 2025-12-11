@@ -27,7 +27,7 @@ public class PointService {
     }
 
     private boolean checkArea(double x, double y, double r) {
-        // 1. Четвертая четверть (x >= 0, y >= 0): четверть круга радиусом R/2
+        // 1. Четвертая четверть (x >= 0, y <= 0): четверть круга радиусом R/2
         if (x >= 0 && y <= 0) {
             return (x * x + y * y) <= (r/2 * r/2);
         }
@@ -41,7 +41,7 @@ public class PointService {
         else if (x <= 0 && y <= 0) {
             return (x >= -r/2 && y >= -r);
         }
-        // 4. Четвертая четверть (x >= 0, y <= 0): нет области
+        // 4. Первая четверть (x >= 0, y >= 0): нет области
         else {
             return false;
         }
