@@ -4,7 +4,6 @@ let points = [];
 const baseUrl = window.contextPath || '';
 const pointForm = document.getElementById('pointForm');
 
-// --- ФУНКЦИИ ОТРИСОВКИ (Оставлены без изменений, сокращено для удобства) ---
 function getCanvas() { return document.getElementById('graphCanvas'); }
 function getCtx() { const c = getCanvas(); return c ? c.getContext('2d') : null; }
 
@@ -275,10 +274,7 @@ function hideValidationError() {
 window.addEventListener("load", function () {
     // Инициализация R
     const rSelect = document.querySelector('[id*="r_input"]') || document.querySelector('[id*="r"] select') || document.querySelector('[id*="r"]');
-    // PrimeFaces часто скрывает настоящий select и делает свой UI.
-    // Пробуем найти значение в скрытом input PrimeFaces или в самом select
 
-    // Ищем R более надежно для PrimeFaces
     updateCurrentR();
 
     loadPointsFromTable();
