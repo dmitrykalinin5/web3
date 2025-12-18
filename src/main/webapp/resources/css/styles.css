@@ -1708,3 +1708,46 @@ body {
     z-index: 10000 !important;
     font-weight: 600 !important;
 }
+/* Стили для улучшенного слайдера */
+.custom-slider .ui-slider-handle {
+    background: #4a6bff;
+    border: 3px solid white;
+    border-radius: 50%;
+    width: 24px !important;
+    height: 24px !important;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.custom-slider .ui-slider-handle:hover {
+    transform: scale(1.2);
+    background: #2a4bff;
+}
+
+.custom-slider .ui-slider-range {
+    background: linear-gradient(90deg, #4a6bff, #667eea);
+    border-radius: 3px;
+}
+
+/* Анимация для отображаемого значения */
+.slider-value-display {
+    font-weight: bold;
+    color: #2a4bff;
+    padding: 8px 16px;
+    background: #f0f4ff;
+    border-radius: 20px;
+    display: inline-block;
+    margin: 10px 0;
+    transition: all 0.3s ease;
+    border: 2px solid #e0e7ff;
+}
+
+.slider-value-display.pulsing {
+    animation: pulse 0.5s ease;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}

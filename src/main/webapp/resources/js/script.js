@@ -1,5 +1,6 @@
 let currentR = 3;
 let points = [];
+let PF = window.PF || {};
 
 const baseUrl = window.contextPath || '';
 const pointForm = document.getElementById('pointForm');
@@ -302,12 +303,18 @@ function initFormHandlers() {
     // но если через JS:
     const rSelect = document.querySelector('[id*="r"]');
     if (rSelect) {
-        // Наблюдаем за изменениями, так как PrimeFaces меняет скрытый input
-        const observer = new MutationObserver(() => {
+        rSelect.addEventListener('change', function() {
+            // При изменении R сбрасываем X к значению по умолчанию
+            if (window.PF && PF('xSlider')) {
+                PF('xSlider').setValue(0);
+                const xInput = document.getElementById('pointForm:x');
+                if (xInput) {
+                    xInput.value = 0;
+                }
+            }
             updateCurrentR();
             drawGraph(currentR);
         });
-        observer.observe(rSelect, { attributes: true, subtree: true, childList: true });
     }
 
     const form = document.getElementById('pointForm');
@@ -349,6 +356,53 @@ function initFormHandlers() {
             });
         }
     }
+
+    const xSlider = document.querySelector('[id*="x_slider"]');
+    if (xSlider) {
+        // Добавляем обработчик для обновления значения при движении
+        xSlider.addEventListener('input', function(event) {
+            const value = parseFloat(event.target.value);
+
+            // Обновляем скрытое поле X
+            const xInput = document.getElementById('pointForm:x');
+            if (xInput) {
+                xInput.value = value;
+                // Триггерим событие изменения
+                const changeEvent = new Event('change', { bubbles: true });
+                xInput.dispatchEvent(changeEvent);
+            }
+
+            // Обновляем отображение
+            const valueDisplay = document.getElementById('pointForm:xOutput');
+            if (valueDisplay) {
+                valueDisplay.textContent = 'X = ' + value;
+                valueDisplay.classList.add('pulsing');
+                setTimeout(() => {
+                    valueDisplay.classList.remove('pulsing');
+                }, 300);
+            }
+        });
+    }
+}
+
+function enhanceSliderInteraction() {
+    const slider = document.querySelector('.ui-slider');
+    const valueDisplay = document.getElementById('pointForm:xOutput');
+
+    if (slider) {
+        // Добавляем обработчик для плавного изменения значения
+        slider.addEventListener('input', function(e) {
+            if (valueDisplay) {
+                // Добавляем анимацию
+                valueDisplay.style.transition = 'transform 0.1s ease';
+                valueDisplay.style.transform = 'scale(1.1)';
+
+                setTimeout(() => {
+                    valueDisplay.style.transform = 'scale(1)';
+                }, 100);
+            }
+        });
+    }
 }
 
 function initCanvasClickHandler() {
@@ -356,7 +410,7 @@ function initCanvasClickHandler() {
     if (!canvas) return;
 
     canvas.addEventListener('click', function(event) {
-        updateCurrentR(); // Убедимся, что R свежий
+        updateCurrentR();
 
         const rect = canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
@@ -365,7 +419,18 @@ function initCanvasClickHandler() {
         const mathX = convertToMathX(x, currentR);
         const mathY = convertToMathY(y, currentR);
 
-        // Заполняем скрытые поля
+        // Устанавливаем значение слайдера через PrimeFaces
+        if (window.PF && PF('xSlider')) {
+            PF('xSlider').setValue(mathX.toFixed(1));
+
+            // Также обновляем скрытое поле через JS
+            const xInput = document.getElementById('pointForm:x');
+            if (xInput) {
+                xInput.value = mathX.toFixed(1);
+            }
+        }
+
+        // Заполняем скрытые поля для графика
         document.getElementById('pointForm:graphX').value = mathX.toFixed(4);
         document.getElementById('pointForm:graphY').value = mathY.toFixed(4);
 
@@ -788,8 +853,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Инициализация обработчиков
-    initFormHandlers();
     initCanvasClickHandler();
+
+    setTimeout(() => {
+        enhanceSliderInteraction();
+        initFormHandlers();
+    }, 500);
 
     // Следим за изменениями R
     const rSelect = document.querySelector('[id*="r"]');

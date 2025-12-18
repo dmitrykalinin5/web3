@@ -73,19 +73,70 @@
             <h:form id="pointForm">
                 <div class="form-section">
                     <h3>Координата X:</h3>
-                    <p:selectOneMenu id="x" value="#{pointBean.x}" required="true" requiredMessage="Выберите значение X">
-                        <f:selectItem itemLabel="Выберите X" itemValue=""/>
-                        <f:selectItem itemValue="-4" itemLabel="-4"/>
-                        <f:selectItem itemValue="-3" itemLabel="-3"/>
-                        <f:selectItem itemValue="-2" itemLabel="-2"/>
-                        <f:selectItem itemValue="-1" itemLabel="-1"/>
-                        <f:selectItem itemValue="0" itemLabel="0"/>
-                        <f:selectItem itemValue="1" itemLabel="1"/>
-                        <f:selectItem itemValue="2" itemLabel="2"/>
-                        <f:selectItem itemValue="3" itemLabel="3"/>
-                        <f:selectItem itemValue="4" itemLabel="4"/>
-                    </p:selectOneMenu>
-                    <h:message for="x" styleClass="error-message"/>
+                    <h:panelGrid columns="1" style="width: 100%; margin-bottom: 10px;">
+                        <!-- Скрытое поле для значения X -->
+                        <h:inputHidden id="x" value="#{pointBean.x}" required="true"
+                                       requiredMessage="Выберите значение X" />
+
+                        <!-- Отображаемое значение -->
+                        <h:outputText id="xOutput" value="Значение X: #{pointBean.x}"
+                                      styleClass="slider-value-display"/>
+
+                        <!-- Слайдер с обработчиком события -->
+                        <p:slider for="x" display="xOutput" displayTemplate="X = {value}"
+                                  minValue="-4" maxValue="4" step="0.1"
+                                  widgetVar="xSlider" styleClass="custom-slider enhanced-slider">
+                        </p:slider>
+
+                        <script type="text/javascript">
+                            // Функция для обновления значения X при движении слайдера
+                            function updateXValue(value) {
+                                // Находим скрытое поле X
+                                var xInput = document.getElementById('pointForm:x');
+                                if (xInput) {
+                                    // Устанавливаем новое значение
+                                    xInput.value = value;
+                                    // Триггерим изменение (важно для JSF)
+                                    $(xInput).trigger('change');
+
+                                    // Также обновляем отображаемое значение
+                                    var xOutput = document.getElementById('pointForm:xOutput');
+                                    if (xOutput) {
+                                        xOutput.textContent = 'X = ' + value;
+                                    }
+                                }
+                            }
+
+                            // Инициализация слайдера после загрузки страницы
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Ждем инициализации PrimeFaces слайдера
+                                setTimeout(function() {
+                                    if (window.PF &amp;&amp; PF('xSlider')) {
+                                        // Добавляем обработчик для обновления значения
+                                        var slider = PF('xSlider');
+                                        slider.jq.on('slide', function(event, ui) {
+                                            updateXValue(ui.value);
+                                        });
+
+                                        slider.jq.on('slideend', function(event, ui) {
+                                            updateXValue(ui.value);
+                                            // Также обновляем через AJAX
+                                            var xInput = document.getElementById('pointForm:x');
+                                            if (xInput) {
+                                                // Вызываем JSF AJAX запрос
+                                                PrimeFaces.ab({
+                                                    source: 'pointForm:x',
+                                                    process: 'pointForm:x',
+                                                    update: 'pointForm:xOutput'
+                                                });
+                                            }
+                                        });
+                                    }
+                                }, 1000);
+                            });
+                        </script>
+                    </h:panelGrid>
+                    <p:message for="x" display="text" styleClass="error-message"/>
                 </div>
 
                 <div class="form-section">
@@ -112,7 +163,7 @@
                 </div>
 
                 <p:commandButton value="Проверить точку" action="#{pointBean.checkPoint}"
-                                 update="resultsTable x y r"
+                                 update="resultsTable x xOutput y r"
                                  oncomplete="handleFormComplete(xhr, status, args)"
                                  styleClass="submit-btn"/>
 

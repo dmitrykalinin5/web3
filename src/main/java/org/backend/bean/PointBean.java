@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Named
 @SessionScoped
 public class PointBean implements Serializable {
-    private Double x;
+    private Double x = 0.0;
     private Double y;
     private Double r = 3.0;
 
@@ -60,8 +60,6 @@ public class PointBean implements Serializable {
         return null;
     }
 
-    // Удалил метод roundXToValidValue
-
     private boolean isValid() {
         return x != null && y != null && r != null &&
                 y >= -3 && y <= 5;
@@ -69,7 +67,18 @@ public class PointBean implements Serializable {
 
     // Getters and Setters (без изменений)
     public Double getX() { return x; }
-    public void setX(Double x) { this.x = x; }
+    public void setX(Double x) {
+        if (x != null) {
+            // Ограничиваем значение диапазоном слайдера
+            if (x < -4) x = -4.0;
+            if (x > 4) x = 4.0;
+
+            // Округляем до одного знака после запятой
+            this.x = Math.round(x * 10) / 10.0;
+        } else {
+            this.x = 0.0;
+        }
+    }
     public Double getY() { return y; }
     public void setY(Double y) { this.y = y; }
     public Double getR() { return r; }
