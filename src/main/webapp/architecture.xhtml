@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<f:view>
+    <h:head>
+        <title>Архитектурные решения (ADR)</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <h:outputStylesheet library="css" name="styles.css"/>
+    </h:head>
+    <h:body>
+        <div class="container">
+            <div class="header">
+                <h1>Архитектурные решения (ADR)</h1>
+                <h:link outcome="/main.xhtml" value="Вернуться к приложению" styleClass="back-link"/>
+            </div>
+
+            <div class="adr-container">
+                <p:panelGrid columns="1" layout="grid" styleClass="adr-grid">
+                    <f:facet name="header">
+                        <h3>Архитектурные решения проекта</h3>
+                        <p>Документация обновляется в реальном времени</p>
+                    </f:facet>
+
+                    <p:dataList value="#{adrBean.allADRs}" var="adr"
+                                type="ordered" itemType="1">
+                        <p:panel styleClass="adr-panel">
+                            <f:facet name="header">
+                                <h:panelGroup layout="block" styleClass="adr-header">
+                                    <h:outputText value="ADR #{adr.id}: #{adr.title}"
+                                                  styleClass="adr-title"/>
+                                    <span class="adr-status status-#{adr.status.toLowerCase()}">
+                                        #{adr.status}
+                                    </span>
+                                </h:panelGroup>
+                            </f:facet>
+
+                            <div class="adr-content">
+                                <h4>Контекст</h4>
+                                <p>#{adr.context}</p>
+
+                                <h4>Решение</h4>
+                                <p>#{adr.decision}</p>
+
+                                <h4>Последствия</h4>
+                                <p>#{adr.consequences}</p>
+
+                                <div class="adr-meta">
+                                    <small>Обновлено: #{adr.updatedAt}</small>
+                                    <small>Файл: #{adr.filename}</small>
+                                </div>
+                            </div>
+                        </p:panel>
+                    </p:dataList>
+                </p:panelGrid>
+
+                <div class="adr-info">
+                    <p:panel header="О системе ADR">
+                        <p>
+                            Архитектурные решения записываются в формате MADR (Markdown Architectural Decision Records).
+                            Файлы хранятся в <code>/src/main/resources/adr/</code> и автоматически обновляются в интерфейсе.
+                        </p>
+                        <p>
+                            При изменении любого ADR-файла система автоматически перезагружает документацию без перезапуска приложения.
+                        </p>
+                    </p:panel>
+                </div>
+            </div>
+        </div>
+    </h:body>
+</f:view>
+</html>

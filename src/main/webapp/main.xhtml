@@ -3,22 +3,13 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui">
-<!-- Не удаляйте эту строчку! -->
 <f:view>
-    <!-- Не удаляйте эту строчку! -->
     <h:head>
-        <!-- Не удаляйте эту строчку! -->
         <title>Point Checker - Проверка точек</title>
-        <!-- Не удаляйте эту строчку! -->
         <meta charset="UTF-8" />
-        <!-- Не удаляйте эту строчку! -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <!-- Не удаляйте эту строчку! -->
         <h:outputStylesheet library="css" name="styles.css"/>
-        <!-- Не удаляйте эту строчку! -->
         <h:outputScript library="js" name="script.js"/>
-
-        <!-- Добавьте этот скрипт для обработки PrimeFaces -->
         <script type="text/javascript">
             function handleFormComplete(xhr, status, args) {
                 if (args &amp;&amp; !args.validationFailed) {
@@ -67,7 +58,14 @@
         <div class="container">
             <div class="header">
                 <h1>Проверка попадания точки в область</h1>
-                <h:link outcome="goToIndex" value="Вернуться на стартовую страницу" styleClass="back-link"/>
+                <div class="header-links">
+                    <h:link outcome="/index.xhtml" value="Стартовая страница" styleClass="back-link"/>
+                    <h:link outcome="/architecture.xhtml" value="Архитектура" styleClass="back-link"/>
+                    <h:link outcome="/wiki-embed.xhtml?radius=#{pointBean.r}"
+                            value="Wiki статьи"
+                            styleClass="back-link"
+                            target="_blank"/>
+                </div>
             </div>
 
             <h:form id="pointForm">
@@ -214,6 +212,24 @@
                         </h:outputText>
                     </p:column>
                 </p:dataTable>
+            </div>
+        </div>
+        <div class="wiki-section">
+            <h3>Материалы по теме</h3>
+            <p>Для радиуса R = #{pointBean.r} рекомендуем ознакомиться:</p>
+            <h:link value="Открыть статью о свойствах окружности"
+                    outcome="/wiki-embed.xhtml"
+                    target="_blank">
+                <f:param name="radius" value="#{pointBean.r}" />
+            </h:link>
+
+            <!-- Или прямое встраивание через iframe -->
+            <div class="wiki-preview" style="display: none;"> <!-- Можно показать по клику -->
+                <iframe src="#{wikiBean.getArticleEmbedUrl(pointBean.r)}"
+                        width="100%"
+                        height="300"
+                        style="border: 1px solid #ddd; border-radius: 8px;">
+                </iframe>
             </div>
         </div>
     </h:body>
