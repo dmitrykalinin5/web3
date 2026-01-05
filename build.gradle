@@ -17,7 +17,6 @@ repositories {
 
 configurations {
     all {
-        // Исключаем javax зависимости (для перехода на Jakarta EE 10)
         exclude group: 'javax', module: 'javaee-api'
         exclude group: 'javax', module: 'javax.faces-api'
         exclude group: 'javax', module: 'javax.servlet-api'
@@ -54,18 +53,27 @@ war {
         include '**/*.jpg'
         include '**/*.png'
         include '**/*.gif'
+        include '**/*'
         into ''
     }
 
-    // Удаляем лишние файлы
     exclude '**/javax/**'
     exclude '**/META-INF/versions/**'
     exclude '**/*.jar'
 
-    // Включаем jboss-deployment-structure.xml
     from('src/main/resources') {
-        include 'jboss-deployment-structure.xml'
-        into 'WEB-INF'
+        include '**/*'
+        into 'WEB-INF/classes'
+    }
+
+    from('src/main/resources/adr') {
+        include '**/*.md'
+        into 'WEB-INF/classes/adr'
+    }
+
+    from('src/main/webapp/WEB-INF/classes/adr') {
+        include '**/*.md'
+        into 'WEB-INF/classes/adr'
     }
 }
 

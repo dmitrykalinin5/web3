@@ -13,19 +13,15 @@
         <script type="text/javascript">
             function handleFormComplete(xhr, status, args) {
                 if (args &amp;&amp; !args.validationFailed) {
-                    // Обновляем график после успешной отправки
                     updateGraphAfterSubmit();
 
-                    // Очищаем сообщения об ошибках
                     hideValidationError();
 
-                    // Показываем уведомление об успехе
                     showSuccessMessage("Точка успешно проверена!");
                 }
             }
 
             function showSuccessMessage(message) {
-                // Создаем уведомление об успехе
                 const notification = document.createElement('div');
                 notification.className = 'success-notification';
                 notification.textContent = message;
@@ -72,32 +68,24 @@
                 <div class="form-section">
                     <h3>Координата X:</h3>
                     <h:panelGrid columns="1" style="width: 100%; margin-bottom: 10px;">
-                        <!-- Скрытое поле для значения X -->
                         <h:inputHidden id="x" value="#{pointBean.x}" required="true"
                                        requiredMessage="Выберите значение X" />
 
-                        <!-- Отображаемое значение -->
                         <h:outputText id="xOutput" value="Значение X: #{pointBean.x}"
                                       styleClass="slider-value-display"/>
 
-                        <!-- Слайдер с обработчиком события -->
                         <p:slider for="x" display="xOutput" displayTemplate="X = {value}"
                                   minValue="-4" maxValue="4" step="0.1"
                                   widgetVar="xSlider" styleClass="custom-slider enhanced-slider">
                         </p:slider>
 
                         <script type="text/javascript">
-                            // Функция для обновления значения X при движении слайдера
                             function updateXValue(value) {
-                                // Находим скрытое поле X
                                 var xInput = document.getElementById('pointForm:x');
                                 if (xInput) {
-                                    // Устанавливаем новое значение
                                     xInput.value = value;
-                                    // Триггерим изменение (важно для JSF)
                                     $(xInput).trigger('change');
 
-                                    // Также обновляем отображаемое значение
                                     var xOutput = document.getElementById('pointForm:xOutput');
                                     if (xOutput) {
                                         xOutput.textContent = 'X = ' + value;
@@ -105,12 +93,9 @@
                                 }
                             }
 
-                            // Инициализация слайдера после загрузки страницы
                             document.addEventListener('DOMContentLoaded', function() {
-                                // Ждем инициализации PrimeFaces слайдера
                                 setTimeout(function() {
                                     if (window.PF &amp;&amp; PF('xSlider')) {
-                                        // Добавляем обработчик для обновления значения
                                         var slider = PF('xSlider');
                                         slider.jq.on('slide', function(event, ui) {
                                             updateXValue(ui.value);
@@ -118,10 +103,8 @@
 
                                         slider.jq.on('slideend', function(event, ui) {
                                             updateXValue(ui.value);
-                                            // Также обновляем через AJAX
                                             var xInput = document.getElementById('pointForm:x');
                                             if (xInput) {
-                                                // Вызываем JSF AJAX запрос
                                                 PrimeFaces.ab({
                                                     source: 'pointForm:x',
                                                     process: 'pointForm:x',
@@ -165,11 +148,9 @@
                                  oncomplete="handleFormComplete(xhr, status, args)"
                                  styleClass="submit-btn"/>
 
-                <!-- Скрытые поля для клика по графику -->
                 <h:inputHidden id="graphX" value="#{pointBean.graphX}"/>
                 <h:inputHidden id="graphY" value="#{pointBean.graphY}"/>
 
-                <!-- Скрытая кнопка для графика -->
                 <p:commandButton id="graphSubmitBtn" action="#{pointBean.checkPointFromGraph}"
                                  process="@this graphX graphY r"
                                  update="resultsTable"
@@ -211,6 +192,14 @@
                             <f:convertDateTime pattern="HH:mm:ss" timeZone="Europe/Moscow"/>
                         </h:outputText>
                     </p:column>
+                    <p:column headerText="Статья">
+                        <h:link value="📖 Открыть статью" 
+                                outcome="/wiki-embed.xhtml" 
+                                target="_blank"
+                                styleClass="wiki-link">
+                            <f:param name="radius" value="#{result.r}" />
+                        </h:link>
+                    </p:column>
                 </p:dataTable>
             </div>
         </div>
@@ -223,8 +212,7 @@
                 <f:param name="radius" value="#{pointBean.r}" />
             </h:link>
 
-            <!-- Или прямое встраивание через iframe -->
-            <div class="wiki-preview" style="display: none;"> <!-- Можно показать по клику -->
+            <div class="wiki-preview" style="display: none;">
                 <iframe src="#{wikiBean.getArticleEmbedUrl(pointBean.r)}"
                         width="100%"
                         height="300"

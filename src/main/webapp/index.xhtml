@@ -35,31 +35,26 @@
             function updateClock() {
                 const now = new Date();
 
-                // Опции для времени
                 const timeOptions = {
                     hour: '2-digit',
                     minute: '2-digit',
                     second: '2-digit'
                 };
 
-                // Опции для даты
                 const dateOptions = {
                     day: '2-digit',
                     month: '2-digit',
                     year: 'numeric'
                 };
 
-                // Формируем строку: Дата + Время
                 const dateString = now.toLocaleDateString('ru-RU', dateOptions);
                 const timeString = now.toLocaleTimeString('ru-RU', timeOptions);
 
                 document.getElementById('clock-display').innerText = dateString + ' ' + timeString;
             }
 
-            // Запускаем сразу
             updateClock();
 
-            // Обновляем раз в 10 секунд (10000 мс)
             setInterval(updateClock, 10000);
         </script>
     </h:body>

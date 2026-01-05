@@ -7,7 +7,6 @@
 
     <display-name>JSF Point Checker</display-name>
 
-    <!-- JSF Servlet -->
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
@@ -20,7 +19,6 @@
         <url-pattern>/faces/*</url-pattern>
     </servlet-mapping>
 
-    <!-- Настройка для обработки статических ресурсов -->
     <context-param>
         <param-name>jakarta.faces.WEBAPP_RESOURCES_DIRECTORY</param-name>
         <param-value>/resources</param-value>

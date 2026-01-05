@@ -19,6 +19,8 @@ public class WikiBean implements Serializable {
 
     private Double currentRadius;
     private String articleUrl;
+    private String articleHtml;
+    private String articleTitle;
 
     @PostConstruct
     public void init() {
@@ -34,15 +36,16 @@ public class WikiBean implements Serializable {
         if (radiusParam != null && !radiusParam.isEmpty()) {
             try {
                 currentRadius = Double.parseDouble(radiusParam);
-                articleUrl = wikiService.getArticleEmbedUrl(currentRadius);
             } catch (NumberFormatException e) {
                 currentRadius = 3.0;
-                articleUrl = wikiService.getArticleEmbedUrl(currentRadius);
             }
         } else if (currentRadius == null) {
             currentRadius = 3.0;
-            articleUrl = wikiService.getArticleEmbedUrl(currentRadius);
         }
+
+        articleUrl = wikiService.getArticleUrl(currentRadius);
+        articleHtml = wikiService.getArticleHtmlContent(currentRadius);
+        articleTitle = wikiService.getArticleTitle(currentRadius);
     }
 
     public Double getCurrentRadius() {
@@ -54,6 +57,9 @@ public class WikiBean implements Serializable {
     }
 
     public String getArticleUrl() {
+        if (articleUrl == null) {
+            loadArticleForCurrentRadius();
+        }
         return articleUrl;
     }
 
@@ -61,7 +67,25 @@ public class WikiBean implements Serializable {
         this.articleUrl = articleUrl;
     }
 
+    public String getArticleHtml() {
+        if (articleHtml == null) {
+            loadArticleForCurrentRadius();
+        }
+        return articleHtml;
+    }
+
+    public String getArticleTitle() {
+        if (articleTitle == null) {
+            loadArticleForCurrentRadius();
+        }
+        return articleTitle;
+    }
+
+    public boolean isArticleLoaded() {
+        return articleHtml != null && !articleHtml.isEmpty();
+    }
+
     public String getArticleEmbedUrl(Double radius) {
-        return wikiService.getArticleEmbedUrl(radius != null ? radius : 3.0);
+        return wikiService.getArticleUrl(radius != null ? radius : 3.0);
     }
 }

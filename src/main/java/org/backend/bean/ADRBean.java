@@ -10,7 +10,7 @@ import org.backend.service.ADRService;
 import java.io.Serializable;
 import java.util.List;
 
-@Named
+@Named("adrBean")
 @ApplicationScoped
 public class ADRBean implements Serializable {
 
@@ -25,6 +25,7 @@ public class ADRBean implements Serializable {
     }
 
     public void loadAllADRs() {
+        adrService.loadADRFiles();
         allADRs = adrService.getAllADRs();
     }
 

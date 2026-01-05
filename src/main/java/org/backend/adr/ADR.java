@@ -12,9 +12,8 @@ public class ADR implements Serializable {
     private String consequences;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String filename; // Добавлено поле
+    private String filename;
 
-    // Конструкторы
     public ADR() {
     }
 
@@ -31,7 +30,6 @@ public class ADR implements Serializable {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Геттеры и сеттеры
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

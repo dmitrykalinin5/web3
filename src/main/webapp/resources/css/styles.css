@@ -93,7 +93,6 @@ input[type="text"]:focus {
     border-color: #667eea;
 }
 
-/* Стили для кнопки очистки истории */
 .clear-history-btn {
     background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
@@ -128,7 +127,6 @@ input[type="text"]:focus {
     font-size: 18px;
 }
 
-/* Стили для информации о результатах */
 .results-info {
     display: flex;
     justify-content: space-between;
@@ -210,6 +208,18 @@ input[type="text"]:focus {
 .miss {
     color: #dc3545;
     font-weight: bold;
+}
+
+.wiki-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.wiki-link:hover {
+    color: #764ba2;
+    text-decoration: underline;
 }
 
 .execution-time {
@@ -310,7 +320,6 @@ input[type="text"]:focus {
     border: none;
 }
 
-/* Кукисы */
 .cookie-consent {
     position: fixed;
     bottom: 0;
@@ -799,7 +808,6 @@ body.cookie-blocked #chat-widget {
     }
 }
 
-/* чат */
 #chat-widget {
     position: fixed;
     bottom: 20px;
@@ -1062,7 +1070,6 @@ body.cookie-blocked #chat-widget {
     visibility: hidden;
 }
 
-/* Анимация появления чата */
 @keyframes slideInUp {
     from {
         transform: translateY(100px);
@@ -1290,7 +1297,6 @@ body.cookie-blocked #chat-widget {
     }
 }
 
-/* Для PrimeFaces компонентов */
 .ui-selectonemenu {
     width: 100%;
     padding: 10px;
@@ -1309,7 +1315,6 @@ body.cookie-blocked #chat-widget {
     border: none;
 }
 
-/* Добавьте если нужно */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -1329,7 +1334,6 @@ body.cookie-blocked #chat-widget {
     text-align: center;
 }
 
-/* Основные стили тела */
 html {
     overflow-y: auto;
     overflow-x: hidden;
@@ -1357,7 +1361,6 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* Стили для заголовка */
 .header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -1381,7 +1384,6 @@ body {
     display: inline-block;
 }
 
-/* Стили для секций формы */
 .form-section {
     margin-bottom: 20px;
     padding: 15px;
@@ -1395,7 +1397,6 @@ body {
     color: #333;
 }
 
-/* Стили для PrimeFaces компонентов */
 .ui-selectonemenu {
     width: 100% !important;
     padding: 12px;
@@ -1418,7 +1419,6 @@ body {
     border-color: #667eea !important;
 }
 
-/* Стили для кнопок */
 .ui-button {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     color: white !important;
@@ -1436,7 +1436,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* Стили для графика */
 .graph-section {
     text-align: center;
     margin: 30px 0;
@@ -1458,7 +1457,6 @@ body {
     box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
-/* Стили для таблицы результатов */
 .results-section {
     margin-top: 30px;
 }
@@ -1499,12 +1497,23 @@ body {
     font-weight: bold;
 }
 
+.wiki-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.wiki-link:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
 .execution-time {
     color: #6c757d;
     font-size: 0.9em;
 }
 
-/* Стили для сообщений об ошибках */
 .error-message {
     color: #dc3545;
     font-size: 0.9em;
@@ -1517,7 +1526,6 @@ body {
     white-space: normal;
 }
 
-/* Стили для сообщения об ошибках валидации под кнопкой */
 .validation-error-message {
     color: #dc3545;
     font-size: 0.95em;
@@ -1536,7 +1544,6 @@ body {
     box-sizing: border-box;
 }
 
-/* Стили для часов и навигации на стартовой странице */
 .clock-container {
     text-align: center;
     padding: 20px;
@@ -1563,7 +1570,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
     .container {
         padding: 10px;
@@ -1592,7 +1598,6 @@ body {
     }
 }
 
-/* Остальные стили (чаты, куки, всплывающие элементы) остаются без изменений */
 #floating-consultants {
     position: fixed;
     top: 0;
@@ -1623,7 +1628,6 @@ body {
     object-fit: cover;
 }
 
-/* Анимации */
 @keyframes floatAndRotate {
     0% { transform: translate(0, 0) rotate(0deg); }
     25% { transform: translate(100px, 50px) rotate(90deg); }
@@ -1632,7 +1636,6 @@ body {
     100% { transform: translate(0, 0) rotate(360deg); }
 }
 
-/* Стили для чата (оставляем без изменений) */
 #chat-widget {
     position: fixed;
     bottom: 20px;
@@ -1648,7 +1651,6 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-/* Стили для куки (оставляем без изменений) */
 .cookie-modal-overlay {
     position: fixed;
     top: 0;
@@ -1659,7 +1661,6 @@ body {
     z-index: 9999;
 }
 
-/* Анимации */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -1687,7 +1688,6 @@ body {
     }
 }
 
-/* Инструкции для графика */
 .graph-instructions {
     margin-top: 10px;
     color: #666;
@@ -1695,7 +1695,6 @@ body {
     text-align: center;
 }
 
-/* Уведомления об успехе */
 .success-notification {
     position: fixed !important;
     top: 20px !important;
@@ -1708,7 +1707,7 @@ body {
     z-index: 10000 !important;
     font-weight: 600 !important;
 }
-/* Стили для улучшенного слайдера */
+
 .custom-slider .ui-slider-handle {
     background: #4a6bff;
     border: 3px solid white;
@@ -1729,7 +1728,6 @@ body {
     border-radius: 3px;
 }
 
-/* Анимация для отображаемого значения */
 .slider-value-display {
     font-weight: bold;
     color: #2a4bff;
@@ -1752,7 +1750,6 @@ body {
     100% { transform: scale(1); }
 }
 
-/* ADR стили */
 .adr-container {
     margin: 20px 0;
 }
@@ -1820,6 +1817,55 @@ body {
     line-height: 1.5;
 }
 
+.adr-content ul, .adr-content ol {
+    margin: 10px 0;
+    padding-left: 30px;
+}
+
+.adr-content li {
+    margin: 5px 0;
+    line-height: 1.6;
+}
+
+.adr-content code {
+    background: #f4f4f4;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.adr-content pre {
+    background: #f4f4f4;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 10px 0;
+}
+
+.adr-content pre code {
+    background: none;
+    padding: 0;
+}
+
+.adr-content strong {
+    font-weight: 600;
+    color: #333;
+}
+
+.adr-content em {
+    font-style: italic;
+}
+
+.adr-content a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.adr-content a:hover {
+    text-decoration: underline;
+}
+
 .adr-meta {
     display: flex;
     justify-content: space-between;
@@ -1834,7 +1880,6 @@ body {
     margin-top: 30px;
 }
 
-/* Wiki секция */
 .wiki-section {
     margin: 30px 0;
     padding: 20px;
@@ -1851,7 +1896,6 @@ body {
     background: white;
 }
 
-/* Навигационные ссылки в хедере */
 .header-links {
     display: flex;
     gap: 15px;
@@ -1872,7 +1916,22 @@ body {
     background: rgba(255, 255, 255, 0.3);
 }
 
-/* Wiki контейнер */
+.refresh-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    margin-left: 10px;
+}
+
+.refresh-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
 .wiki-info {
     margin-top: 20px;
     padding: 15px;
@@ -1881,7 +1940,6 @@ body {
     border: 1px solid #e0e0e0;
 }
 
-/* Навигационные кнопки на стартовой странице */
 .navigation {
     display: flex;
     gap: 15px;

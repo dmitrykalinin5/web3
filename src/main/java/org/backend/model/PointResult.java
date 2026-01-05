@@ -30,7 +30,6 @@ public class PointResult implements Serializable {
     @Column(name = "timestamp_col")
     private Date timestamp;
 
-    // Конструкторы
     public PointResult() {}
 
     public PointResult(Double x, Double y, Double r, Boolean hit, Date timestamp) {
@@ -41,7 +40,6 @@ public class PointResult implements Serializable {
         this.timestamp = timestamp;
     }
 
-    // Геттеры и сеттеры
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -57,7 +55,6 @@ public class PointResult implements Serializable {
     public Boolean getHit() { return hit; }
     public void setHit(Boolean hit) { this.hit = hit; }
 
-    // Добавьте метод isHit() для совместимости
     public boolean isHit() {
         return hit != null && hit;
     }

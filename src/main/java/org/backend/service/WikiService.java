@@ -1,43 +1,139 @@
 package org.backend.service;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 @ApplicationScoped
 public class WikiService {
 
-    private static final String WIKI_API_BASE = "http://localhost:3000/api"; // Адрес Wiki.js
-    private static final String API_TOKEN = "your-wiki-api-token";
+    private static final String WIKI_API_BASE = "http://localhost:3000/graphql";
+    private static final String WIKI_GRAPHQL_URL = "http://localhost:3000/graphql";
+    private static final String WIKI_BASE_URL = "http://localhost:3000";
+    private static final String API_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGkiOjEsImdycCI6MSwiaWF0IjoxNzY2ODU4ODQyLCJleHAiOjE3OTg0MTY0NDIsImF1ZCI6InVybjp3aWtpLmpzIiwiaXNzIjoidXJuOndpa2kuanMifQ.UH7Q6XAAuJU_tsJqdIKkOffgTl2JFJevQ0ZpfxRivspnlfbQjfskvGuyU3BW-q3tAi2Or5188lN-b6rhyh8fHrH-DZL5tRcnORE6H-FNcjtDpUPajemiNbpDNNJ0xizIUNRyrzrtJceFITMFHU5VS-vFcmS72qPa36HO8NzPXZX3BADA0x_SltHH0lwX-E7z_1SPellA4QOtoblDyrC56pjnUk35ZhB_su1QDaGBS4gVpqkbnR3oqo3l3Ky22-oMF67Qzu3Dx_Juf_4SpyY5HuIB-9UAaY7oIdg-IpoWj8VgxEvPjleEIsHCGvqi_r6CFWBfsQOiMZIcC6VjfUeCYw";
 
     private final Map<Double, String> radiusArticles = new HashMap<>();
 
-    @PostConstruct
-    public void init() {
-        radiusArticles.put(1.0, "circle-radius-1");
+    public WikiService() {
         radiusArticles.put(1.5, "circle-geometry-basics");
-        radiusArticles.put(2.0, "circle-properties");
         radiusArticles.put(2.5, "advanced-circle-math");
         radiusArticles.put(3.0, "circle-applications");
+        radiusArticles.put(1.0, "coordinate-system");
+        radiusArticles.put(2.0, "graph-visualization");
     }
 
-    public String getArticleLinkForRadius(double radius) {
+    public String getArticleHtmlContent(double radius) {
+        String slug = radiusArticles.getOrDefault(radius, "circle-applications");
+
+        try {
+            // ШАГ 1: Ищем ID страницы по её пути (slug)
+            Integer pageId = findPageIdByPath(slug);
+            if (pageId == null) {
+                return "Ошибка: Страница с путем '" + slug + "' не найдена в Wiki.js.";
+            }
+
+            // ШАГ 2: Получаем контент по ID
+            return fetchPageContentById(pageId);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Ошибка при загрузке: " + e.getMessage();
+        }
+    }
+
+    private Integer findPageIdByPath(String slug) throws Exception {
+        // Query для поиска ID по пути
+        String query = "{\"query\": \"{ pages { search(query: \\\"" + slug + "\\\") { results { id, path } } } }\"}";
+        JsonObject response = executeGraphql(query);
+
+        JsonArray results = response.get("data").getAsJsonObject()
+                .get("pages").getAsJsonObject()
+                .get("search").getAsJsonObject()
+                .get("results").getAsJsonArray();
+
+        for (int i = 0; i < results.size(); i++) {
+            JsonObject item = results.get(i).getAsJsonObject();
+            // Точное совпадение пути
+            if (item.get("path").getAsString().equalsIgnoreCase(slug)) {
+                return item.get("id").getAsInt();
+            }
+        }
+        return null;
+    }
+
+    private String fetchPageContentById(int id) throws Exception {
+        // Query для получения контента (теперь используем обязательный аргумент id)
+        String query = "{\"query\": \"{ pages { single(id: " + id + ") { content, contentType, title } } }\"}";
+        JsonObject response = executeGraphql(query);
+
+        JsonObject page = response.get("data").getAsJsonObject()
+                .get("pages").getAsJsonObject()
+                .get("single").getAsJsonObject();
+
+        String content = page.get("content").getAsString();
+        String type = page.get("contentType").getAsString();
+
+        return "markdown".equalsIgnoreCase(type) ? convertMarkdownToHtml(content) : content;
+    }
+
+    private JsonObject executeGraphql(String jsonPayload) throws Exception {
+        URL url = new URL(WIKI_GRAPHQL_URL);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setRequestProperty("Authorization", "Bearer " + API_TOKEN);
+        conn.setDoOutput(true);
+
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(jsonPayload.getBytes(StandardCharsets.UTF_8));
+        }
+
+        if (conn.getResponseCode() != 200) {
+            throw new RuntimeException("HTTP Error " + conn.getResponseCode());
+        }
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) sb.append(line);
+
+        return JsonParser.parseString(sb.toString()).getAsJsonObject();
+    }
+
+    private String convertMarkdownToHtml(String markdown) {
+        Parser parser = Parser.builder().build();
+        Node document = parser.parse(markdown);
+        HtmlRenderer renderer = HtmlRenderer.builder().build();
+        return renderer.render(document);
+    }
+
+    public String getArticleUrl(double radius) {
         String articleSlug = radiusArticles.get(radius);
         if (articleSlug != null) {
-            return WIKI_API_BASE + "/page/" + articleSlug + "/embed";
+            return WIKI_BASE_URL + "/" + articleSlug;
         }
-        return WIKI_API_BASE + "/page/mathematics-intro/embed";
+        return WIKI_BASE_URL + "/mathematics-intro";
     }
 
-    public JsonObject getArticleContent(String articleSlug) {
+    public String getArticleTitle(double radius) {
+        String articleSlug = radiusArticles.get(radius);
+        if (articleSlug == null) {
+            return "Общие свойства окружности";
+        }
+
         try {
             URL url = new URL(WIKI_API_BASE + "/page/" + articleSlug + "?token=" + API_TOKEN);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -46,7 +142,7 @@ public class WikiService {
 
             if (conn.getResponseCode() == 200) {
                 BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(conn.getInputStream())
+                        new InputStreamReader(conn.getInputStream(), "UTF-8")
                 );
                 StringBuilder response = new StringBuilder();
                 String line;
@@ -55,28 +151,16 @@ public class WikiService {
                 }
                 reader.close();
 
-                return new Gson().fromJson(response.toString(), JsonObject.class);
+                JsonObject jsonResponse = JsonParser.parseString(response.toString()).getAsJsonObject();
+                if (jsonResponse.has("title")) {
+                    return jsonResponse.get("title").getAsString();
+                }
             }
             conn.disconnect();
         } catch (Exception e) {
-            System.err.println("Error fetching Wiki article: " + e.getMessage());
+            System.err.println("Error fetching Wiki article title: " + e.getMessage());
         }
-        return null;
-    }
 
-    public String getArticleEmbedUrl(double radius) {
-        String articleSlug = radiusArticles.get(radius);
-        if (articleSlug != null) {
-            return WIKI_API_BASE + "/page/" + articleSlug + "/embed";
-        }
-        return WIKI_API_BASE + "/page/mathematics-intro/embed";
-    }
-
-    public String getLocalArticleEmbedUrl(double radius) {
-        String articleSlug = radiusArticles.get(radius);
-        if (articleSlug != null) {
-            return "/wiki/embed/" + articleSlug;
-        }
-        return "/wiki/embed/mathematics-intro";
+        return articleSlug.replace("-", " ");
     }
 }

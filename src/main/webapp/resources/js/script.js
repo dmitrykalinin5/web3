@@ -28,8 +28,6 @@ function drawGraph(r) {
     drawAxes(ctx, width, height, centerX, centerY);
     drawLabels(ctx, centerX, centerY, scale, r);
 
-    // Рисуем все точки, которые подходят под текущий R (или все, если хотите видеть историю)
-    // Здесь фильтруем по R, чтобы видеть только точки для текущего радиуса
     const filteredPoints = points.filter(point => Math.abs(point.r - r) < 0.001);
     drawPoints(ctx, centerX, centerY, scale, r, filteredPoints);
 }
@@ -39,22 +37,19 @@ function drawShapes(ctx, centerX, centerY, scale, r) {
     ctx.strokeStyle = 'rgba(102, 126, 234, 0.8)';
     ctx.lineWidth = 2;
 
-    // 1 четверть: четверть круга
     ctx.beginPath();
     ctx.arc(centerX, centerY, (r/2) * scale, 1.5 * Math.PI, Math.PI * 2, false);
     ctx.lineTo(centerX, centerY);
     ctx.closePath();
     ctx.fill(); ctx.stroke();
 
-    // 2 четверть: треугольник
     ctx.beginPath();
     ctx.moveTo(centerX, centerY);
     ctx.lineTo(centerX - (r/2) * scale, centerY);
-    ctx.lineTo(centerX, centerY - (r/2) * scale); // Исправлено направление Y для Canvas
+    ctx.lineTo(centerX, centerY - (r/2) * scale);
     ctx.closePath();
     ctx.fill(); ctx.stroke();
 
-    // 3 четверть: прямоугольник
     ctx.beginPath();
     ctx.rect(centerX - (r/2) * scale, centerY, (r/2) * scale, r * scale);
     ctx.fill(); ctx.stroke();
@@ -86,41 +81,30 @@ function drawLabels(ctx, centerX, centerY, scale, r) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    // Подписи осей
     ctx.fillText('X', ctx.canvas.width - 10, centerY - 15);
     ctx.fillText('Y', centerX + 15, 10);
 
-    // Рисуем метки для оси X
-    // R
     ctx.fillText('R', centerX + r * scale, centerY + 15);
     ctx.beginPath(); ctx.moveTo(centerX + r * scale, centerY - 3); ctx.lineTo(centerX + r * scale, centerY + 3); ctx.stroke();
 
-    // R/2
     ctx.fillText('R/2', centerX + (r / 2) * scale, centerY + 15);
     ctx.beginPath(); ctx.moveTo(centerX + (r/2) * scale, centerY - 3); ctx.lineTo(centerX + (r/2) * scale, centerY + 3); ctx.stroke();
 
-    // -R
     ctx.fillText('-R', centerX - r * scale, centerY + 15);
     ctx.beginPath(); ctx.moveTo(centerX - r * scale, centerY - 3); ctx.lineTo(centerX - r * scale, centerY + 3); ctx.stroke();
 
-    // -R/2
     ctx.fillText('-R/2', centerX - (r / 2) * scale, centerY + 15);
     ctx.beginPath(); ctx.moveTo(centerX - (r/2) * scale, centerY - 3); ctx.lineTo(centerX - (r/2) * scale, centerY + 3); ctx.stroke();
 
-    // Рисуем метки для оси Y (сдвигаем текст немного влево от оси)
-    // R
     ctx.fillText('R', centerX - 15, centerY - r * scale);
     ctx.beginPath(); ctx.moveTo(centerX - 3, centerY - r * scale); ctx.lineTo(centerX + 3, centerY - r * scale); ctx.stroke();
 
-    // R/2
     ctx.fillText('R/2', centerX - 20, centerY - (r / 2) * scale);
     ctx.beginPath(); ctx.moveTo(centerX - 3, centerY - (r/2) * scale); ctx.lineTo(centerX + 3, centerY - (r/2) * scale); ctx.stroke();
 
-    // -R
     ctx.fillText('-R', centerX - 15, centerY + r * scale);
     ctx.beginPath(); ctx.moveTo(centerX - 3, centerY + r * scale); ctx.lineTo(centerX + 3, centerY + r * scale); ctx.stroke();
 
-    // -R/2
     ctx.fillText('-R/2', centerX - 20, centerY + (r / 2) * scale);
     ctx.beginPath(); ctx.moveTo(centerX - 3, centerY + (r/2) * scale); ctx.lineTo(centerX + 3, centerY + (r/2) * scale); ctx.stroke();
 }
@@ -139,8 +123,6 @@ function drawPoints(ctx, centerX, centerY, scale, r, pointsToDraw) {
     });
 }
 
-// --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
-
 function convertToMathX(canvasX, R) {
     const canvas = getCanvas();
     const centerX = canvas.width / 2;
@@ -155,24 +137,17 @@ function convertToMathY(canvasY, R) {
     return (centerY - canvasY) / scale;
 }
 
-// --- ЛОГИКА ОБНОВЛЕНИЯ ПОСЛЕ AJAX ---
-
 function handleFormComplete(xhr, status, args) {
     if (args && !args.validationFailed) {
-        // Успех
         updateGraphAfterSubmit();
         hideValidationError();
         showSuccessMessage("Точка успешно проверена!");
     } else {
-        // Ошибка валидации на сервере (если есть)
         showValidationError("Ошибка проверки данных на сервере");
     }
 }
 
 function updateGraphAfterSubmit() {
-    // PrimeFaces обновляет DOM таблицы асинхронно.
-    // Иногда oncomplete срабатывает чуть раньше, чем браузер отрисует новую строку.
-    // Делаем небольшую задержку, чтобы DOM точно обновился.
     setTimeout(() => {
         loadPointsFromTable();
         drawGraph(currentR);
@@ -180,26 +155,22 @@ function updateGraphAfterSubmit() {
 }
 
 function loadPointsFromTable() {
-    // Получаем тело таблицы PrimeFaces
     const tableBody = document.querySelector('#resultsTable_data');
     if (!tableBody) return;
 
-    points = []; // Очищаем старые точки перед полным сканированием таблицы
+    points = [];
     const rows = tableBody.querySelectorAll('tr');
 
     rows.forEach(row => {
         const cells = row.querySelectorAll('td');
-        // Проверяем, что это не строка "Нет записей" (PrimeFaces empty message)
         if (cells.length >= 4 && row.getAttribute('data-ri') !== null) {
             try {
-                // Парсим значения, заменяя запятые на точки
                 const x = parseFloat(cells[0].innerText.trim().replace(',', '.'));
                 const y = parseFloat(cells[1].innerText.trim().replace(',', '.'));
                 const r = parseFloat(cells[2].innerText.trim().replace(',', '.'));
 
-                // Определяем попадание по классу или тексту
                 const hitText = cells[3].innerText.trim();
-                const hitSpan = cells[3].querySelector('span'); // Если внутри есть span с классом
+                const hitSpan = cells[3].querySelector('span');
                 let hit = false;
 
                 if (hitSpan && hitSpan.classList.contains('hit')) hit = true;
@@ -217,19 +188,15 @@ function loadPointsFromTable() {
     console.log(`Загружено ${points.length} точек из таблицы.`);
 }
 
-// --- УВЕДОМЛЕНИЯ ---
-
 function showSuccessMessage(message) {
-    createNotification(message, '#28a745'); // Зеленый
+    createNotification(message, '#28a745');
 }
 
-// Новая функция ошибки в стиле успеха
 function showValidationError(message) {
-    createNotification(message, '#dc3545'); // Красный
+    createNotification(message, '#dc3545');
 }
 
 function createNotification(message, bgColor) {
-    // Удаляем старые уведомления, чтобы не накладывались
     const old = document.querySelector('.custom-notification');
     if (old) old.remove();
 
@@ -262,18 +229,13 @@ function createNotification(message, bgColor) {
 }
 
 function hideValidationError() {
-    // Функция-заглушка, так как новые уведомления сами исчезают,
-    // но можно использовать для принудительного удаления
     const notification = document.querySelector('.custom-notification');
-    if (notification && notification.style.background.includes('220')) { // Если красный
+    if (notification && notification.style.background.includes('220')) {
         notification.remove();
     }
 }
 
-// --- ИНИЦИАЛИЗАЦИЯ И СОБЫТИЯ ---
-
 window.addEventListener("load", function () {
-    // Инициализация R
     const rSelect = document.querySelector('[id*="r_input"]') || document.querySelector('[id*="r"] select') || document.querySelector('[id*="r"]');
 
     updateCurrentR();
@@ -285,26 +247,20 @@ window.addEventListener("load", function () {
 });
 
 function updateCurrentR() {
-    // Попытка найти значение R из виджета PrimeFaces или select
-    const rElement = document.getElementById('pointForm:r_input'); // Стандартный ID PrimeFaces для скрытого инпута
+    const rElement = document.getElementById('pointForm:r_input');
     if (rElement) {
         currentR = parseFloat(rElement.value);
     } else {
-        // Fallback если не PrimeFaces
         const rSelect = document.querySelector("select[id*='r']");
         if(rSelect && rSelect.value) currentR = parseFloat(rSelect.value);
     }
-    if (isNaN(currentR)) currentR = 3; // Дефолт
+    if (isNaN(currentR)) currentR = 3;
 }
 
 function initFormHandlers() {
-    // Слушаем изменение R в PrimeFaces
-    // PrimeFaces создает div с классами ui-selectonemenu. Лучше использовать onchange в xhtml,
-    // но если через JS:
     const rSelect = document.querySelector('[id*="r"]');
     if (rSelect) {
         rSelect.addEventListener('change', function() {
-            // При изменении R сбрасываем X к значению по умолчанию
             if (window.PF && PF('xSlider')) {
                 PF('xSlider').setValue(0);
                 const xInput = document.getElementById('pointForm:x');
@@ -319,22 +275,15 @@ function initFormHandlers() {
 
     const form = document.getElementById('pointForm');
     if(form) {
-        // Перехватываем стандартную кнопку, чтобы добавить валидацию
         const submitBtn = document.querySelector('.submit-btn');
-        // Примечание: p:commandButton работает через AJAX onclick,
-        // поэтому addEventListener('submit') на форму может не сработать как ожидается.
-        // Лучше использовать onclick на кнопку или встроенную валидацию JSF.
 
-        // Но для JS-валидации "перед отправкой" (чтобы показать тосты):
         if(submitBtn) {
             submitBtn.addEventListener('click', function(e) {
                 let errors = [];
 
-                // Валидация X
-                const xInput = document.getElementById('pointForm:x_input'); // PrimeFaces
+                const xInput = document.getElementById('pointForm:x_input');
                 if (!xInput || !xInput.value) errors.push("Выберите X");
 
-                // Валидация Y
                 const yInput = document.getElementById('pointForm:y');
                 if (!yInput || !yInput.value) {
                     errors.push("Введите Y");
@@ -343,15 +292,11 @@ function initFormHandlers() {
                     if (y < -3 || y > 5) errors.push("Y от -3 до 5");
                 }
 
-                // Валидация R
                 const rInput = document.getElementById('pointForm:r_input');
                 if (!rInput || !rInput.value) errors.push("Выберите R");
 
                 if (errors.length > 0) {
-                    // Если есть ошибки, показываем тост и, возможно, пытаемся остановить запрос
-                    // (с PrimeFaces остановить сложнее, если не использовать onstart)
                     showValidationError(errors.join(", "));
-                    // e.preventDefault(); // Это может не остановить PrimeFaces AJAX, но попробуем
                 }
             });
         }
@@ -359,20 +304,16 @@ function initFormHandlers() {
 
     const xSlider = document.querySelector('[id*="x_slider"]');
     if (xSlider) {
-        // Добавляем обработчик для обновления значения при движении
         xSlider.addEventListener('input', function(event) {
             const value = parseFloat(event.target.value);
 
-            // Обновляем скрытое поле X
             const xInput = document.getElementById('pointForm:x');
             if (xInput) {
                 xInput.value = value;
-                // Триггерим событие изменения
                 const changeEvent = new Event('change', { bubbles: true });
                 xInput.dispatchEvent(changeEvent);
             }
 
-            // Обновляем отображение
             const valueDisplay = document.getElementById('pointForm:xOutput');
             if (valueDisplay) {
                 valueDisplay.textContent = 'X = ' + value;
@@ -390,10 +331,8 @@ function enhanceSliderInteraction() {
     const valueDisplay = document.getElementById('pointForm:xOutput');
 
     if (slider) {
-        // Добавляем обработчик для плавного изменения значения
         slider.addEventListener('input', function(e) {
             if (valueDisplay) {
-                // Добавляем анимацию
                 valueDisplay.style.transition = 'transform 0.1s ease';
                 valueDisplay.style.transform = 'scale(1.1)';
 
@@ -419,29 +358,24 @@ function initCanvasClickHandler() {
         const mathX = convertToMathX(x, currentR);
         const mathY = convertToMathY(y, currentR);
 
-        // Устанавливаем значение слайдера через PrimeFaces
         if (window.PF && PF('xSlider')) {
             PF('xSlider').setValue(mathX.toFixed(1));
 
-            // Также обновляем скрытое поле через JS
             const xInput = document.getElementById('pointForm:x');
             if (xInput) {
                 xInput.value = mathX.toFixed(1);
             }
         }
 
-        // Заполняем скрытые поля для графика
         document.getElementById('pointForm:graphX').value = mathX.toFixed(4);
         document.getElementById('pointForm:graphY').value = mathY.toFixed(4);
 
-        // Жмем скрытую кнопку
         const btn = document.getElementById('pointForm:graphSubmitBtn');
         if (btn) btn.click();
     });
 }
 
 function addPointToGraph(x, y, hit, r) {
-    // Сохраняем R вместе с точкой для правильной фильтрации
     points.push({ x, y, hit, r: r || currentR });
     drawGraph(currentR);
 }
@@ -461,7 +395,6 @@ function addRow(rowData) {
         <td class="execution-time">${rowData.executionTime}</td>
     `;
 
-    // Немедленно добавляем точку на график
     addPointToGraph(parseFloat(rowData.x), parseFloat(rowData.y), rowData.hit, parseFloat(rowData.r));
 }
 
@@ -593,7 +526,7 @@ function clearHistoryOnServer() {
 }
 
 function updatePointsFromTable() {
-    const table = document.getElementById('resultsTable_data'); // ID таблицы PrimeFaces
+    const table = document.getElementById('resultsTable_data');
     if (!table) {
         console.log('Table not found, waiting...');
         setTimeout(updatePointsFromTable, 500);
@@ -601,13 +534,12 @@ function updatePointsFromTable() {
     }
 
     points = [];
-    const rows = table.querySelectorAll('tr'); // PrimeFaces строки
+    const rows = table.querySelectorAll('tr');
 
     rows.forEach(row => {
         const cells = row.querySelectorAll('td');
         if (cells.length >= 5) {
             try {
-                // ВАЖНО: Заменяем запятую на точку перед парсингом!
                 const xText = cells[0].textContent.trim().replace(',', '.');
                 const yText = cells[1].textContent.trim().replace(',', '.');
                 const rText = cells[2].textContent.trim().replace(',', '.');
@@ -616,7 +548,7 @@ function updatePointsFromTable() {
                 const y = parseFloat(yText);
                 const r = parseFloat(rText);
                 const hitText = cells[3].textContent.trim();
-                const hit = hitText.includes('Попадание') || hitText.toLowerCase().includes('hit'); // Добавил проверку на разные варианты
+                const hit = hitText.includes('Попадание') || hitText.toLowerCase().includes('hit');
 
                 if (!isNaN(x) && !isNaN(y) && !isNaN(r)) {
                     points.push({ x, y, r, hit });
@@ -643,16 +575,12 @@ window.addEventListener("load", function () {
 
     drawGraph(currentR);
 
-    // Загружаем точки из таблицы
     setTimeout(updateGraphAfterSubmit, 500);
 
-    // Инициализация обработчиков формы
     initFormHandlers();
 
-    // Инициализация обработчика клика на canvas
     initCanvasClickHandler();
 
-    // Установка начального значения R и отрисовка графика
     const defaultR = document.querySelector('select[id*="r"]');
     if (defaultR && defaultR.value) {
         currentR = parseFloat(defaultR.value);
@@ -660,11 +588,9 @@ window.addEventListener("load", function () {
     if (currentR) {
         drawGraph(currentR);
     } else {
-        // Если R не выбран, рисуем график с дефолтным значением для визуализации
         drawGraph(3);
     }
 
-    // Перерисовка графика при изменении R через select
     document.addEventListener('change', function(e) {
         if (e.target && e.target.id && e.target.id.includes('r')) {
             const rValue = parseFloat(e.target.value);
@@ -712,10 +638,8 @@ if (pointForm) {
         let valid = true;
         const errors = [];
 
-        // Очищаем предыдущие ошибки
         hideValidationError();
 
-        // Валидация полей X (selectOneMenu)
         const xSelect = pointForm.querySelector('select[id*="x"]');
         if (!xSelect || !xSelect.value || xSelect.value === '') {
             const xError = pointForm.querySelector('[id*="x"]')?.closest('.form-section')?.querySelector('.error-message');
@@ -758,20 +682,15 @@ if (pointForm) {
         }
 
         if (!valid) {
-            // Показываем все ошибки под кнопкой
             showValidationError(errors.join(' '));
             event.preventDefault();
             return false;
         }
 
-        // Если валидация прошла успешно, скрываем ошибки
         hideValidationError();
-        // Форма отправится обычным way
-        // и пользователь будет перенаправлен на страницу результата
     });
 }
 
-// Функция для обновления графика при изменении R (вызывается из PrimeFaces AJAX)
 function updateGraphFromR() {
     const rSelect = document.querySelector('[id*="r"]');
     if (rSelect && rSelect.value) {
@@ -793,7 +712,6 @@ if (yField) {
             if (errorElement) {
                 errorElement.textContent = '';
             }
-            // Очищаем ошибки валидации при корректном вводе
             hideValidationError();
         } else {
             if (errorElement) {
@@ -807,7 +725,6 @@ if (yField) {
 function submitPointFromGraph(x, y, r) {
     if (!pointForm) return;
 
-    // Обновляем значения в форме
     const xSelect = document.querySelector('[id*="x"]');
     const yInput = document.querySelector('[id*="y"]');
     const rSelect = document.querySelector('[id*="r"]');
@@ -816,10 +733,8 @@ function submitPointFromGraph(x, y, r) {
     if (yInput) yInput.value = y;
     if (rSelect) rSelect.value = r;
 
-    // Ищем и вызываем команду PrimeFaces
     const submitButton = document.querySelector('[id*="checkPoint"]');
     if (submitButton && typeof PrimeFaces !== 'undefined') {
-        // Используем PrimeFaces AJAX
         PrimeFaces.ajax.AjaxRequest({
             source: submitButton,
             process: submitButton.id,
@@ -834,10 +749,8 @@ function submitPointFromGraph(x, y, r) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Page loaded, initializing...');
 
-    // Загружаем начальные точки
     updatePointsFromTable();
 
-    // Наблюдаем за изменениями в таблице
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'childList') {
@@ -852,7 +765,6 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(table, { childList: true, subtree: true });
     }
 
-    // Инициализация обработчиков
     initCanvasClickHandler();
 
     setTimeout(() => {
@@ -860,7 +772,6 @@ document.addEventListener('DOMContentLoaded', function() {
         initFormHandlers();
     }, 500);
 
-    // Следим за изменениями R
     const rSelect = document.querySelector('[id*="r"]');
     if (rSelect) {
         rSelect.addEventListener('change', function() {
