@@ -18,6 +18,7 @@ public class WikiBean implements Serializable {
     private WikiService wikiService;
 
     private Double currentRadius;
+    private String currentArticleSlug;
     private String articleUrl;
     private String articleHtml;
     private String articleTitle;
@@ -41,6 +42,14 @@ public class WikiBean implements Serializable {
             }
         } else if (currentRadius == null) {
             currentRadius = 3.0;
+        }
+
+        String articleParam = params.get("article");
+        if (articleParam != null && !articleParam.isEmpty()) {
+            currentArticleSlug = articleParam;
+        } else {
+            // Если slug не указан, получаем его на основе радиуса
+            currentArticleSlug = wikiService.getArticleSlugForRadius(currentRadius);
         }
 
         articleUrl = wikiService.getArticleUrl(currentRadius);
@@ -79,6 +88,14 @@ public class WikiBean implements Serializable {
             loadArticleForCurrentRadius();
         }
         return articleTitle;
+    }
+
+    public String getCurrentArticleSlug() {
+        return currentArticleSlug;
+    }
+
+    public void setCurrentArticleSlug(String currentArticleSlug) {
+        this.currentArticleSlug = currentArticleSlug;
     }
 
     public boolean isArticleLoaded() {

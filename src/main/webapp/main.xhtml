@@ -193,11 +193,12 @@
                         </h:outputText>
                     </p:column>
                     <p:column headerText="Статья">
-                        <h:link value="📖 Открыть статью" 
-                                outcome="/wiki-embed.xhtml" 
+                        <h:link value="#{result.articleTitle}"
+                                outcome="/wiki-embed.xhtml"
                                 target="_blank"
                                 styleClass="wiki-link">
                             <f:param name="radius" value="#{result.r}" />
+                            <f:param name="article" value="#{result.articleSlug}" />
                         </h:link>
                     </p:column>
                 </p:dataTable>

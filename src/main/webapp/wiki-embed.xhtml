@@ -69,7 +69,20 @@
             <div class="header">
                 <h1>Математические материалы</h1>
                 <p>Статья из Wiki.js по теме выбранного радиуса</p>
-                <p class="radius-info">Текущий радиус: <strong>#{wikiBean.currentRadius}</strong></p>
+                <p class="radius-info">
+                    Текущий радиус: <strong>#{wikiBean.currentRadius}</strong><br/>
+                    Статья: <strong>#{wikiBean.articleTitle}</strong><br/>
+                    Тема: <strong>
+                    <c:choose>
+                        <c:when test="#{wikiBean.currentRadius == 1.0}">Основы координатной плоскости</c:when>
+                        <c:when test="#{wikiBean.currentRadius == 1.5}">Геометрия окружности</c:when>
+                        <c:when test="#{wikiBean.currentRadius == 2.0}">Свойства окружности</c:when>
+                        <c:when test="#{wikiBean.currentRadius == 2.5}">Продвинутая геометрия окружности</c:when>
+                        <c:when test="#{wikiBean.currentRadius == 3.0}">Применение окружностей</c:when>
+                        <c:otherwise>Общая математическая статья</c:otherwise>
+                    </c:choose>
+                </strong>
+                </p>
             </div>
 
             <div class="wiki-container">

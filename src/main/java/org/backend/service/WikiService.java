@@ -26,13 +26,21 @@ public class WikiService {
     private static final String API_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGkiOjEsImdycCI6MSwiaWF0IjoxNzY2ODU4ODQyLCJleHAiOjE3OTg0MTY0NDIsImF1ZCI6InVybjp3aWtpLmpzIiwiaXNzIjoidXJuOndpa2kuanMifQ.UH7Q6XAAuJU_tsJqdIKkOffgTl2JFJevQ0ZpfxRivspnlfbQjfskvGuyU3BW-q3tAi2Or5188lN-b6rhyh8fHrH-DZL5tRcnORE6H-FNcjtDpUPajemiNbpDNNJ0xizIUNRyrzrtJceFITMFHU5VS-vFcmS72qPa36HO8NzPXZX3BADA0x_SltHH0lwX-E7z_1SPellA4QOtoblDyrC56pjnUk35ZhB_su1QDaGBS4gVpqkbnR3oqo3l3Ky22-oMF67Qzu3Dx_Juf_4SpyY5HuIB-9UAaY7oIdg-IpoWj8VgxEvPjleEIsHCGvqi_r6CFWBfsQOiMZIcC6VjfUeCYw";
 
     private final Map<Double, String> radiusArticles = new HashMap<>();
+    private final Map<Double, String> radiusArticleTitles = new HashMap<>();
 
     public WikiService() {
-        radiusArticles.put(1.5, "circle-geometry-basics");
-        radiusArticles.put(2.5, "advanced-circle-math");
-        radiusArticles.put(3.0, "circle-applications");
-        radiusArticles.put(1.0, "coordinate-system");
-        radiusArticles.put(2.0, "graph-visualization");
+        radiusArticles.put(1.0, "Coordinate_Plane_Fundamentals");
+        radiusArticles.put(1.5, "Circle_Geometry");
+        radiusArticles.put(2.0, "Circle_Properties");
+        radiusArticles.put(2.5, "Advanced_Circle_Geometry");
+        radiusArticles.put(3.0, "Practical_Applications_of_Circles");
+
+        // Маппинг радиуса -> отображаемое название статьи
+        radiusArticleTitles.put(1.0, "Coordinate Plane Fundamentals");
+        radiusArticleTitles.put(1.5, "Circle Geometry");
+        radiusArticleTitles.put(2.0, "Circle Properties");
+        radiusArticleTitles.put(2.5, "Advanced Circle Geometry");
+        radiusArticleTitles.put(3.0, "Practical Applications of Circles");
     }
 
     public String getArticleHtmlContent(double radius) {
@@ -125,42 +133,18 @@ public class WikiService {
         if (articleSlug != null) {
             return WIKI_BASE_URL + "/" + articleSlug;
         }
-        return WIKI_BASE_URL + "/mathematics-intro";
+        return WIKI_BASE_URL + "/analytic-geometry-introduction";
     }
 
     public String getArticleTitle(double radius) {
-        String articleSlug = radiusArticles.get(radius);
-        if (articleSlug == null) {
-            return "Общие свойства окружности";
-        }
+        return radiusArticleTitles.getOrDefault(radius, "General Mathematics Article");
+    }
 
-        try {
-            URL url = new URL(WIKI_API_BASE + "/page/" + articleSlug + "?token=" + API_TOKEN);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Accept", "application/json");
+    public String getArticleTitleForRadius(double radius) {
+        return radiusArticleTitles.getOrDefault(radius, "General Mathematics Article");
+    }
 
-            if (conn.getResponseCode() == 200) {
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(conn.getInputStream(), "UTF-8")
-                );
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-
-                JsonObject jsonResponse = JsonParser.parseString(response.toString()).getAsJsonObject();
-                if (jsonResponse.has("title")) {
-                    return jsonResponse.get("title").getAsString();
-                }
-            }
-            conn.disconnect();
-        } catch (Exception e) {
-            System.err.println("Error fetching Wiki article title: " + e.getMessage());
-        }
-
-        return articleSlug.replace("-", " ");
+    public String getArticleSlugForRadius(double radius) {
+        return radiusArticles.getOrDefault(radius, "analytic-geometry-introduction");
     }
 }
