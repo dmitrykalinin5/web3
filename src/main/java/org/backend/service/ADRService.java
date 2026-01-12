@@ -38,6 +38,21 @@ public class ADRService {
         loadADRFiles();
     }
 
+    public List<ADR> getAllADRsSorted() {
+        return adrCache.values()
+                .stream()
+                .sorted((a1, a2) -> {
+                    try {
+                        int id1 = Integer.parseInt(a1.getId());
+                        int id2 = Integer.parseInt(a2.getId());
+                        return Integer.compare(id1, id2);
+                    } catch (NumberFormatException e) {
+                        return a1.getId().compareTo(a2.getId());
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
     public void loadADRFiles() {
         adrCache.clear();
         try {

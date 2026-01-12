@@ -26,7 +26,7 @@ public class ADRBean implements Serializable {
 
     public void loadAllADRs() {
         adrService.loadADRFiles();
-        allADRs = adrService.getAllADRs();
+        allADRs = adrService.getAllADRsSorted();
     }
 
     public List<ADR> getAllADRs() {
