@@ -2,9 +2,7 @@ package org.backend.model;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 @Entity
 @Table(name = "point_result")
@@ -61,50 +59,4 @@ public class PointResult implements Serializable {
 
     public Date getTimestamp() { return timestamp; }
     public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
-
-    @Transient
-    public String getFormattedTime() {
-        if (timestamp == null) return "";
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-        return sdf.format(timestamp);
-    }
-
-    @Transient
-    public String getArticleTitle() {
-        if (r == null) return "General Mathematics";
-
-        if (r.equals(1.0)) {
-            return "Coordinate Plane Fundamentals";
-        } else if (r.equals(1.5)) {
-            return "Circle Geometry";
-        } else if (r.equals(2.0)) {
-            return "Circle Properties";
-        } else if (r.equals(2.5)) {
-            return "Advanced Circle Geometry";
-        } else if (r.equals(3.0)) {
-            return "Practical Applications of Circles";
-        } else {
-            return "General Mathematics Article";
-        }
-    }
-
-    @Transient
-    public String getArticleSlug() {
-        if (r == null) return "analytic-geometry-introduction";
-
-        if (r.equals(1.0)) {
-            return "Coordinate_Plane_Fundamentals";
-        } else if (r.equals(1.5)) {
-            return "Circle_Geometry";
-        } else if (r.equals(2.0)) {
-            return "Circle_Properties";
-        } else if (r.equals(2.5)) {
-            return "Advanced_Circle_Geometry";
-        } else if (r.equals(3.0)) {
-            return "Practical_Applications_of_Circles";
-        } else {
-            return "analytic-geometry-introduction";
-        }
-    }
 }

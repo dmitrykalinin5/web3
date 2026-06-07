@@ -56,11 +56,6 @@
                 <h1>Проверка попадания точки в область</h1>
                 <div class="header-links">
                     <h:link outcome="/index.xhtml" value="Стартовая страница" styleClass="back-link"/>
-                    <h:link outcome="/architecture.xhtml" value="Архитектура" styleClass="back-link"/>
-                    <h:link outcome="/wiki-embed.xhtml?radius=#{pointBean.r}"
-                            value="Wiki статьи"
-                            styleClass="back-link"
-                            target="_blank"/>
                 </div>
             </div>
 
@@ -192,33 +187,7 @@
                             <f:convertDateTime pattern="HH:mm:ss" timeZone="Europe/Moscow"/>
                         </h:outputText>
                     </p:column>
-                    <p:column headerText="Статья">
-                        <h:link value="#{result.articleTitle}"
-                                outcome="/wiki-embed.xhtml"
-                                target="_blank"
-                                styleClass="wiki-link">
-                            <f:param name="radius" value="#{result.r}" />
-                            <f:param name="article" value="#{result.articleSlug}" />
-                        </h:link>
-                    </p:column>
                 </p:dataTable>
-            </div>
-        </div>
-        <div class="wiki-section">
-            <h3>Материалы по теме</h3>
-            <p>Для радиуса R = #{pointBean.r} рекомендуем ознакомиться:</p>
-            <h:link value="Открыть статью о свойствах окружности"
-                    outcome="/wiki-embed.xhtml"
-                    target="_blank">
-                <f:param name="radius" value="#{pointBean.r}" />
-            </h:link>
-
-            <div class="wiki-preview" style="display: none;">
-                <iframe src="#{wikiBean.getArticleEmbedUrl(pointBean.r)}"
-                        width="100%"
-                        height="300"
-                        style="border: 1px solid #ddd; border-radius: 8px;">
-                </iframe>
             </div>
         </div>
     </h:body>

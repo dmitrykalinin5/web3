@@ -1,0 +1,14 @@
+systemctl --user status web3-wildfly.service
+
+остановить
+systemctl --user stop web3-wildfly.service
+pg_ctl -D .local-dev/pgdata stop
+
+Снова запустить БД и WildFly:
+
+pg_ctl -D .local-dev/pgdata -l .local-dev/postgres.log -o "-p 5433 -k /tmp" start
+
+systemd-run --user --unit=web3-wildfly --collect \
+  --working-directory=/home/ogultra/Documents/web3 \
+  --setenv=JAVA_HOME=/home/ogultra/Documents/web3/.local-dev/jdk \
+  /home/ogultra/Documents/web3/.local-dev/wildfly/bin/standalone.sh -b 127.0.0.1

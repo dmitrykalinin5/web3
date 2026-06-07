@@ -35,12 +35,6 @@ dependencies {
     compileOnly 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 
     implementation 'org.hibernate.orm:hibernate-core:6.2.7.Final'
-    implementation 'commons-io:commons-io:2.11.0'
-    implementation 'org.commonmark:commonmark:0.21.0'
-
-    implementation 'com.google.code.gson:gson:2.10.1'
-
-    compileOnly 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
 }
 
 war {
@@ -64,16 +58,6 @@ war {
     from('src/main/resources') {
         include '**/*'
         into 'WEB-INF/classes'
-    }
-
-    from('src/main/resources/adr') {
-        include '**/*.md'
-        into 'WEB-INF/classes/adr'
-    }
-
-    from('src/main/webapp/WEB-INF/classes/adr') {
-        include '**/*.md'
-        into 'WEB-INF/classes/adr'
     }
 }
 
